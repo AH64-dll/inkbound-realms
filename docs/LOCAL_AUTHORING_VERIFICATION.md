@@ -45,7 +45,11 @@ CPU threads. It produced accepted fresh reading analysis, an original world
 foundation, gameplay rules, a region and a faction. Its first settlement attempts
 used a display name as a market identifier and were rejected. The harness now
 explicitly distinguishes market IDs from display names and retains final error
-details. A resumed compile is still pending; these accepted intermediate tools
+details. A subsequent structurally valid response classified the home as a camp, so
+home-specific validation now requires an actual settlement inside its region.
+The server was then restarted with a 16K context, Q8 caches and eight batch
+threads after observing slow Q4-cache prompt processing.
+A resumed compile is still pending; these accepted intermediate tools
 are not a completed or playable realm. Typed source identities distinguish proper
 names from reusable concepts, with actual-source spelling checks.
 
@@ -60,6 +64,6 @@ inkbound compile fixtures/books/science_fiction.txt realms/live-relay \
 
 A completed experiment must validate the resulting package, inspect its creative
 quality, play its linked objectives/combat/progression and verify save/resume.
-Structured transport alone is insufficient evidence. The 213 passing automated
+Structured transport alone is insufficient evidence. The 219 passing automated
 tests, fixture campaigns, screenshots and wheel-install smoke test establish
 their own narrower scopes.

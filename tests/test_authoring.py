@@ -139,6 +139,27 @@ class FixtureToolProvider:
         return Response([ToolCall(name, payload)], usage=Usage(input_tokens=100, output_tokens=50, requests=1))
 
 
+@pytest.mark.parametrize("failure", ["camp", "outside_region"])
+def test_home_services_and_spatial_contract_are_checked_before_dungeon_authoring(spec, failure):
+    class InvalidHome(FixtureToolProvider):
+        def complete(self, system, prompt, tools):
+            if tools[0].name == "create_location":
+                self.requests.append((tools[0].name, prompt))
+                payload = self.spec.locations[0].model_dump(mode="json")
+                if failure == "camp":
+                    payload["kind"] = "camp"
+                else:
+                    payload["x"] = self.spec.regions[0].width
+                return Response([ToolCall("create_location", payload)])
+            return super().complete(system, prompt, tools)
+    provider = InvalidHome(spec)
+    book = ingest(Path("fixtures/books") / (spec.metadata.id.split(".")[1] + ".txt"))
+    with pytest.raises(ProviderError, match="The home must"):
+        Harness(provider).compile(book, realm_id="realm.rejected", seed=42, adaptation=spec.metadata.adaptation)
+    assert "create_spell_system" not in provider.counters
+    assert sum(name == "create_location" for name, _ in provider.requests) == 3
+
+
 def test_copied_creative_foundation_is_rejected_before_gameplay_construction(spec):
     book = ingest(Path("fixtures/books") / (spec.metadata.id.split(".")[1] + ".txt"))
     class CopyingProvider(FixtureToolProvider):

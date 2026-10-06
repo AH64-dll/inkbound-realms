@@ -195,7 +195,7 @@ class Harness:
             if name in {"create_faction", "create_location", "create_character", "create_enemy_archetype", "create_boss", "create_artifact", "define_player_archetype", "create_item_family"}:
                 instruction += " For original inspiration, each actor, faction, location and item needs at least four distinct substantive changes in provenance.transformations: identity, history, motives, relationships, role, appearance or geography. Naming alone does not count."
             if name == "create_location":
-                instruction += " Market_items maps stable item IDs to positive integer prices, never display names. IDs use only lowercase letters, digits, underscores, dots or hyphens. Plan those exact item IDs for the later item-family tool; use an empty market if none are needed."
+                instruction += " Market_items maps stable item IDs to positive integer stock quantities, never display names or prices. IDs use only lowercase letters, digits, underscores, dots or hyphens. Plan those exact item IDs for the later item-family tool; use an empty market if none are needed."
             result = self.ask(name, instruction, {**context, "realm_so_far": data}, check=check)
             if section:
                 if isinstance(data.get(section), list): data[section].append(result.model_dump(mode="json"))
@@ -227,7 +227,13 @@ class Harness:
         run("define_gameplay_rules", "Define reusable RPG primitives: stats carrying power/armor/speed/influence roles, health plus any genre-appropriate secondary resources, damage types and flexible equipment slots. Plan stable IDs for abilities and progression; do not hardcode warriors, mana or fantasy equipment.")
         run("create_region", "Create the first coherent region. Choose wilderness, nautical or station generator according to the source. Size 64x40, accessible start, connected topology and a continuing frontier.", "regions")
         run("create_faction", "Create a power with a social structure, culture, ideology and tangible interest in the region. Plan a settlement home ID.", "factions")
-        run("create_location", "Create that settlement with a market, care and a practical source of rumors. Coordinates within region bounds. A real hearth for this book-derived player.", "locations")
+        def check_home(location):
+            if location.kind != "settlement":
+                raise ValueError("The home must have kind=settlement so market and care services work")
+            region = next((r for r in data["regions"] if r["id"] == location.region_id), None)
+            if region is None or not (0 < location.x < region["width"] - 1 and 0 < location.y < region["height"] - 1):
+                raise ValueError("The home must reference an existing region and lie inside its boundaries")
+        run("create_location", "Create that settlement with kind=settlement, a market, care and a practical source of rumors. Coordinates within region bounds. A real hearth for this book-derived player.", "locations", check=check_home)
         run("create_location", "Create a first short dungeon or ruin in this region: a meaningful abandoned institution, not filler. One floor, a source of conflict and recoverable knowledge.", "locations")
         run("create_location", "Create a final dungeon in the same region, gated by a planned earlier quest's completion. Its guardian personifies the realm's conflict. One floor.", "locations")
         run("create_spell_system", "Compose occupational abilities from effects: free damage default, a distinct signature action, recovery and negotiation. 'Spell' is just a tool name; science-fiction abilities are technology and nautical ones seamanship. Include needed status effects; hostile abilities need free damage too.")
