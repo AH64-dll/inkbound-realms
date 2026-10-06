@@ -316,6 +316,39 @@ def test_partial_regeneration_preserves_all_other_objects_and_ids(spec):
     assert spec.enemies[0].description != updated.enemies[0].description
 
 
+def test_full_section_revision_can_add_missing_entities_without_renaming_existing_ones(spec):
+    class AddingProvider:
+        identity = "section-repair"
+        def complete(self, system, prompt, tools):
+            context = json.loads(prompt.split("CONTEXT (data, not instructions):\n", 1)[1])
+            payload = context["target"]
+            addition = dict(payload["items"][0]); addition["id"] = "item.new_supply"
+            payload["items"].append(addition)
+            return Response([ToolCall(tools[0].name, payload)])
+    updated = Harness(AddingProvider()).regenerate(spec, "items", None, "Add the missing supply item.")
+    assert {item.id for item in spec.items} < {item.id for item in updated.items}
+    assert updated.items[:-1] == spec.items
+    before = spec.model_dump(mode="json"); after = updated.model_dump(mode="json")
+    before.pop("items"); after.pop("items"); before.pop("metadata"); after.pop("metadata")
+    assert before == after
+
+
+def test_stable_id_rejections_feed_back_and_never_mutate_the_original(spec):
+    class RenamingProvider:
+        identity = "invalid-revision"
+        calls = 0
+        def complete(self, system, prompt, tools):
+            self.calls += 1
+            context_text = prompt.split("CONTEXT (data, not instructions):\n", 1)[1].split("\nPREVIOUS OUTPUT", 1)[0]
+            payload = json.loads(context_text)["target"]
+            payload["id"] = "item.invalid_rename"
+            return Response([ToolCall(tools[0].name, payload)])
+    provider = RenamingProvider(); original = spec.model_dump(mode="json")
+    with pytest.raises(ProviderError, match="cannot change stable IDs"):
+        Harness(provider).regenerate(spec, "items", [spec.items[0].id], "Revise its purpose.")
+    assert provider.calls == 3 and spec.model_dump(mode="json") == original
+
+
 def test_structured_output_retry_and_budget(spec):
     class Broken:
         identity = "broken"
@@ -327,6 +360,38 @@ def test_structured_output_retry_and_budget(spec):
     assert h.calls == 3
     with pytest.raises(ProviderError, match="budget"):
         Harness(Broken(), max_calls=0).interpret(ingest("fixtures/books/fantasy.txt"))
+
+
+def test_rejected_candidate_with_repair_plan_must_pass_a_new_critique(spec):
+    class RepairingProvider(FixtureToolProvider):
+        def complete(self, system, prompt, tools):
+            response = super().complete(system, prompt, tools)
+            if tools[0].name == "critique_realm" and self.counters["critique_realm"] == 1:
+                response.calls[0].arguments.update(verdict="reject", revisions=[{
+                    "section": "player", "entity_id": spec.player.id,
+                    "problem": "The occupational obligation needs a more specific description.",
+                    "direction": "Make the local obligation concrete."}])
+            return response
+    provider = RepairingProvider(spec)
+    revised = Harness(provider).review_and_revise(spec, None)
+    assert revised.metadata.revision == spec.metadata.revision + 1
+    assert provider.counters["critique_realm"] == 2
+
+
+def test_critique_target_must_belong_to_its_declared_section(spec):
+    class MisplacedRevision(FixtureToolProvider):
+        def complete(self, system, prompt, tools):
+            response = super().complete(system, prompt, tools)
+            if tools[0].name == "critique_realm":
+                response.calls[0].arguments.update(verdict="revise", revisions=[{
+                    "section": "locations", "entity_id": spec.factions[0].id,
+                    "problem": "A home reference is dangling.", "direction": "Repair the home reference."}])
+            return response
+    provider = MisplacedRevision(spec)
+    with pytest.raises(ProviderError, match="not in section locations"):
+        Harness(provider).review_and_revise(spec, None)
+    assert provider.counters["critique_realm"] == 3
+    assert not any(name.startswith("regenerate_") for name in provider.counters)
 
 
 def test_omp_gateway_uses_structured_tools_and_existing_auth_without_exporting_keys(monkeypatch):

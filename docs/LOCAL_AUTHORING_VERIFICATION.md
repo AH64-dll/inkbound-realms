@@ -73,7 +73,7 @@ inkbound compile fixtures/books/science_fiction.txt realms/live-relay \
 
 A completed experiment must validate the resulting package, inspect its creative
 quality, play its linked objectives/combat/progression and verify save/resume.
-Structured transport alone is insufficient evidence. The 231 passing automated
+Structured transport alone is insufficient evidence. The 243 passing automated
 tests, fixture campaigns, screenshots and wheel-install smoke test establish
 their own narrower scopes.
 
@@ -97,3 +97,15 @@ inkbound compile fixtures/books/science_fiction.txt realms/live-swe2 \
 
 Connectivity and accepted intermediate content are still distinct from the
 required final package validation, creative inspection and actual campaign.
+
+SWE-2 completed the initial construction and critique. Cross-object validation
+found missing items, unreachable dialogue, unavailable enemy ability costs and
+incorrect quest target kinds; no invalid package was published. The live run
+exposed repair-protocol gaps now covered by regression tests: whole-section
+revisions can add missing entities while retaining existing IDs, single-object
+ID changes trigger corrective retries, critique targets are constrained to
+existing entities in the correct section, and explicit repair plans must pass a
+new critique. Validation issues are sorted for reproducible caching. Reviews are
+bounded to six rounds within the authoring call budget. Quest repair prompts
+spell out target kinds and negotiation's existing enemy-resolution behavior.
+The resumed run remains pending final validation and gameplay.

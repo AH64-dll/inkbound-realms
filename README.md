@@ -149,7 +149,7 @@ local CPU inference running concurrently; that is
 not a benchmark for arbitrary large generated realms.
 
 Live model authorship, generated-world creative quality, extended human play,
-and PR publication remain verification gates. See the
+remain verification gates. The PR is intentionally prepared locally. See the
 [local authoring experiment](docs/LOCAL_AUTHORING_VERIFICATION.md) for actual
 model failures, safeguards and remaining acceptance checks. The package runtime currently
 ports the coherent core loop; the original game's full war-age simulation,

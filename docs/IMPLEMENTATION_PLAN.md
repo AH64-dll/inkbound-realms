@@ -44,7 +44,7 @@ original request. Offline fixtures do not prove live semantic authorship;
 render smoke tests do not prove a whole campaign is enjoyable. Persist genuine
 limitations and verify the largest possible authorized scope before handoff.
 
-Current evidence: 231 tests passed, including HTTP streaming, server-disconnect
+Current evidence: 243 tests passed, including HTTP streaming, server-disconnect
 and retry checks. The local model returned structured source analysis and a
 world identity, but both contained copied passages and cannot be accepted.
 Fresh-prose guards now run during reading and creative-foundation construction.

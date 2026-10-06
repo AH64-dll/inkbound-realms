@@ -4,9 +4,9 @@ from __future__ import annotations
 import json
 from copy import deepcopy
 from dataclasses import asdict
-from typing import Callable, Literal
+from typing import Callable, Literal, get_args
 
-from pydantic import Field, ValidationError
+from pydantic import Field, ValidationError, create_model
 
 from inkbound.authoring.ingest import Book
 from inkbound.authoring.originality import originality_issues, copied_prose_issues, prose_fields, protected_names, transformation_count, names_in_text, entity_prose
@@ -291,19 +291,38 @@ class Harness:
         spec = self.review_and_revise(spec, book)
         return RealmPackage(spec)
 
-    def review_and_revise(self, spec: m.RealmSpec, book: Book | None, *, rounds=3):
+    def review_and_revise(self, spec: m.RealmSpec, book: Book | None, *, rounds=6):
         if book is not None and book.digest != spec.metadata.source_digest:
             raise ValueError("Source book digest does not match this realm")
         for attempt in range(rounds):
-            issues = validate_realm(spec) + (originality_issues(spec, book) if book else [])
-            critique = self.ask("critique_realm", "Critique against creative direction and source interpretation. Reject generic, repetitive, contradictory, tonally inconsistent or mechanically meaningless content. Evaluate originality across dimensions. If validation issues exist, verdict cannot be accept. Supply precise scoped revisions preserving IDs.",
-                                {"realm": spec.model_dump(mode="json"), "issues": [asdict(i) for i in issues], "criteria": spec.creative_direction.quality_criteria})
+            issues = sorted(validate_realm(spec) + (originality_issues(spec, book) if book else []),
+                            key=lambda issue: (issue.code, issue.path, issue.message))
+            targets = {}
+            for section_name in get_args(Revision.model_fields["section"].annotation):
+                section = getattr(spec, section_name)
+                entities = section if isinstance(section, list) else [section]
+                targets[section_name] = sorted(entity.id for entity in entities if hasattr(entity, "id"))
+            all_targets = sorted({entity_id for values in targets.values() for entity_id in values})
+            revision_model = create_model("ExistingEntityRevision", __base__=Revision,
+                                          entity_id=(Literal[tuple([None, *all_targets])], None))
+            critique_model = create_model("ScopedCritique", __base__=Critique,
+                                          revisions=(list[revision_model], Field(default_factory=list, max_length=12)))
+            def check_revisions(critique):
+                for revision in critique.revisions:
+                    if revision.entity_id:
+                        section = getattr(spec, revision.section)
+                        entities = section if isinstance(section, list) else [section]
+                        if revision.entity_id not in {getattr(entity, "id", None) for entity in entities}:
+                            raise ValueError(f"Revision target {revision.entity_id} is not in section {revision.section}; valid targets: {targets[revision.section]}. Use entity_id=null to add missing entities in that section")
+            critique = self.ask("critique_realm", "Critique against creative direction and source interpretation. Reject generic, repetitive, contradictory, tonally inconsistent or mechanically meaningless content. Evaluate originality across dimensions. If validation issues exist, verdict cannot be accept. Supply precise scoped revisions preserving IDs. Revision targets must be existing IDs in the specified section. To add missing entities, use entity_id=null and name the additions in direction. Do not target missing IDs. Progression unlocks map numeric level strings to lists of ability IDs, not the reverse.",
+                                {"realm": spec.model_dump(mode="json"), "issues": [asdict(i) for i in issues], "criteria": spec.creative_direction.quality_criteria,
+                                 "revision_targets": targets}, model=critique_model, check=check_revisions)
             if critique.verdict == "accept" and not issues and not critique.revisions:
                 return require_valid(spec)
-            if critique.verdict == "reject" or not critique.revisions:
+            if not critique.revisions:
                 raise InvalidRealm(issues) if issues else ProviderError("Creative review rejected the realm")
             if attempt == rounds - 1:
-                raise ProviderError("Realm did not pass validation and creative review after revision")
+                raise InvalidRealm(issues) if issues else ProviderError("Realm did not pass creative review after revision")
             for revision in critique.revisions:
                 spec = self.regenerate(spec, revision.section, [revision.entity_id] if revision.entity_id else None,
                                        revision.problem + "\n" + revision.direction, validate=False)
@@ -315,8 +334,29 @@ class Harness:
         allowed = {"player", "factions", "regions", "enemies", "quests", "locations", "items", "assets", "dialogues", "npcs", "abilities", "progression", "creative_direction", "world_rules", "stats", "resources", "damage_types", "equipment_slots", "status_effects", "skills", "classes", "species", "crafting", "encounters", "world_events", "economy"}
         if scope not in allowed:
             raise ValueError("Unsupported regeneration scope")
+        if scope == "quests":
+            instruction = ("Objective contracts: visit targets regions/locations; kill targets enemy archetypes and counts both combat defeat and successful negotiation; talk targets NPCs only; collect targets items; craft targets recipes; pay targets locations and uses gold; escort targets NPCs with a destination location; choice targets dialogue IDs. There is no negotiate objective kind: use kill for enemy resolution, including peaceful negotiation. " + instruction)
         data = spec.model_dump(mode="json")
         original = getattr(spec, scope)
+        if isinstance(original, list) and not ids:
+            section_model = create_model("Revision_" + scope, __base__=m.Model,
+                                         **{scope: (type(spec).model_fields[scope].annotation, Field(min_length=len(original)))})
+            existing = {entity.id for entity in original}
+            def check_section(result):
+                revised = getattr(result, scope)
+                revised_ids = [entity.id for entity in revised]
+                if len(revised_ids) != len(set(revised_ids)) or not existing <= set(revised_ids):
+                    raise ValueError("Keep every existing stable ID exactly once; add new entities only when required")
+            updated = self.ask("regenerate_" + scope,
+                               "Revise this complete section. Keep every existing stable ID; you may add newly required entities in this section. Preserve valid references and correct dangling references using defined IDs. Other sections remain unchanged. Never rewrite engine code. " + instruction,
+                               {"creative_direction": spec.creative_direction.model_dump(mode="json"), "realm": self.context_view(data),
+                                "target": {scope: [entity.model_dump(mode="json") for entity in original]}},
+                               model=section_model, check=check_section)
+            data[scope] = updated.model_dump(mode="json")[scope]
+            data["metadata"]["revision"] += 1
+            candidate = m.RealmSpec.model_validate(data)
+            if validate: require_valid(candidate)
+            return candidate
         targets = original if isinstance(original, list) else [original]
         if ids:
             requested = set(ids)
@@ -328,10 +368,11 @@ class Harness:
         for target in targets:
             model = type(target)
             tool_name = "regenerate_" + scope
-            updated = self.ask(tool_name, "Revise only this object. Keep its exact ID, external references, schema and mechanical role; implement the requested substantive changes. Never rewrite engine code. " + instruction,
-                               {"creative_direction": spec.creative_direction.model_dump(mode="json"), "realm": data, "target": target.model_dump(mode="json")}, model=model)
-            if isinstance(target, m.Entity) and updated.id != target.id:
-                raise ValueError("Regeneration cannot change stable IDs")
+            def check_stable(updated):
+                if isinstance(target, m.Entity) and updated.id != target.id:
+                    raise ValueError("Regeneration cannot change stable IDs; retain " + target.id)
+            updated = self.ask(tool_name, "Revise only this object. Keep its exact ID, schema and mechanical role; preserve valid references and correct dangling references using defined IDs. Do not add entities outside this object. Never rewrite engine code. " + instruction,
+                               {"creative_direction": spec.creative_direction.model_dump(mode="json"), "realm": self.context_view(data), "target": target.model_dump(mode="json")}, model=model, check=check_stable)
             replacements.append(updated)
         if isinstance(original, list):
             by_id = {x.id: x.model_dump(mode="json") for x in replacements}
