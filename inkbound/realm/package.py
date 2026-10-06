@@ -40,7 +40,9 @@ def safe_file(root: Path, relative: str) -> Path:
 
 class RealmPackage:
     def __init__(self, spec: RealmSpec, root: Path | None = None):
-        self._spec = require_valid(spec.model_copy(deep=True))
+        # Nested dict/list edits bypass Pydantic's assignment validation. Reparse
+        # even an existing model before accepting it as an immutable snapshot.
+        self._spec = require_valid(RealmSpec.model_validate(spec.model_dump(mode="python")))
         self._root = root
         self._raw = canonical(self._spec.model_dump(mode="json"))
         self._digest = hashlib.sha256(self._raw).hexdigest()

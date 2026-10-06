@@ -115,6 +115,10 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
         fail("invalid_player", "player.resources", "Player has no health")
     if rules.default_ability_id not in p.ability_ids:
         fail("invalid_player", "player.abilities", "Player must know the default attack")
+    if rules.default_ability_id in groups["abilities"]:
+        attack = index[rules.default_ability_id]
+        if attack.target not in ("enemy", "all_enemies") or attack.range < 1 or any(attack.cost.values()) or not any(e.kind == "damage" for e in attack.effects):
+            fail("invalid_default_attack", "world_rules", "Default attack must be free, damaging and able to reach a hostile target")
     if not set(p.special_mechanics) <= set(rules.supported_mechanics):
         fail("unsupported_mechanics", "player.special_mechanics", "Engine cannot implement requested mechanics")
     if len({x.id for x in p.passives}) != len(p.passives):
@@ -148,6 +152,8 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
         if actor is p:
             actor_abilities += p.interaction_ability_ids
             if p.class_id in groups["classes"]: actor_abilities += index[p.class_id].ability_ids
+        else:
+            actor_abilities += actor.phase_ability_ids
         for aid in actor_abilities:
             ability = index.get(aid)
             if aid in groups["abilities"] and any(rid not in actor.resources or cost > actor.resources[rid] for rid, cost in ability.cost.items()):
@@ -466,7 +472,7 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
             fail("unreachable_quest", q.id, "Giver, prerequisites or objectives cannot be reached")
 
     # Conservative baseline combat check: a free attack must sustain ordinary play.
-    usable = [a for a in spec.abilities if a.id in p.ability_ids and not any(a.cost.values())]
+    usable = [a for a in spec.abilities if a.id in p.ability_ids and a.target in ("enemy", "all_enemies") and a.range > 0 and not any(a.cost.values())]
     if not any(e.kind == "damage" for a in usable for e in a.effects):
         fail("zero_damage_loop", "player", "Player needs a free damaging ability")
     for enemy in spec.enemies:
@@ -475,16 +481,19 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
         regeneration = index[rules.health_resource_id].regen if rules.health_resource_id in groups["resources"] else 0
         for a in usable:
             turn_damage = 0
+            heavy_damage = 0
             for e in a.effects:
                 if e.kind == "damage":
                     raw = e.amount + a.power_scale * p.stats.get(rules.power_stat_id, 0)
                     resist = enemy.resistances.get(e.damage_type, 0)
                     turn_damage += max(1, raw - armor) * (100 - resist) // 100
+                    heavy_damage += max(1, raw * 170 // 100 - armor) * (100 - resist) // 100
+            if a.id == rules.default_ability_id: turn_damage = max(turn_damage, heavy_damage)
             can_hurt |= turn_damage > regeneration or turn_damage >= enemy.resources.get(rules.health_resource_id, 1)
         if not can_hurt:
             fail("unkillable_enemy", enemy.id, "No baseline sustainable attack defeats health regeneration or kills in one action")
         if enemy.behavior != "passive":
-            enemy_free = [index[aid] for aid in enemy.ability_ids if aid in groups["abilities"] and not any(index[aid].cost.values())]
+            enemy_free = [index[aid] for aid in enemy.ability_ids if aid in groups["abilities"] and index[aid].target in ("enemy", "all_enemies") and index[aid].range > 0 and not any(index[aid].cost.values())]
             if not any(e.kind == "damage" for a in enemy_free for e in a.effects):
                 fail("zero_damage_loop", enemy.id, "Hostile enemy needs a sustainable damaging ability")
     for entity in spec.entities():
@@ -516,6 +525,20 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
             for key, m in maps.items():
                 if "boss" in m.points and tuple(m.points["boss"]) not in m.reachable():
                     fail("invalid_spawn", key, "Boss cannot be reached from stairs")
+            for table in spec.encounters:
+                key = table.location_id or table.region_id
+                if key not in maps:
+                    fail("invalid_spawn", table.id, "Location has no encounter interior; use its region for outdoor encounters")
+                    continue
+                m = maps[key]
+                safe_points = m.points.values() if key in groups["regions"] else [m.entrance]
+                capacity = sum(all(abs(x - p[0]) + abs(y - p[1]) > 4 for p in safe_points) for x, y in m.reachable())
+                if sum(table.enemy_counts.values()) > capacity:
+                    fail("invalid_spawn", table.id, "Encounter declares more actors than reachable spawn tiles")
+            for key, m in maps.items():
+                occupants = sum((npc.location_id if npc.location_id in maps else index[npc.location_id].region_id) == key for npc in spec.npcs)
+                if occupants > len(m.reachable()) - 1:
+                    fail("invalid_spawn", key, "Interior cannot place all NPCs away from the entrance")
         except ValueError as exc:
             fail("invalid_topology", "maps", str(exc))
     return issues

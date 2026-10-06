@@ -20,6 +20,24 @@ def test_all_genres_validate_and_roundtrip(spec):
     jsonschema.validate(json.loads(encoded), schema)
 
 
+def test_model_dictionary_mutation_cannot_bypass_package_schema(spec):
+    data = spec.model_copy(deep=True)
+    data.player.stats[data.world_rules.power_stat_id] = True
+    with pytest.raises(ValidationError):
+        RealmPackage(data)
+
+
+def test_boss_phase_ability_requires_resources_the_boss_can_supply(spec):
+    data = spec.model_copy(deep=True)
+    boss = next(enemy for enemy in data.enemies if enemy.role == "boss")
+    phase = data.abilities[0].model_copy(deep=True)
+    phase.id = "ability.phase-only"
+    phase.cost = {"resource.energy": 1000}
+    data.abilities.append(phase)
+    boss.phase_ability_ids = [phase.id]
+    assert any(issue.code == "unsupported_ability" and issue.path == boss.id for issue in validate_realm(data))
+
+
 def test_provenance_must_reference_an_ingested_chunk(spec):
     data = spec.model_copy(deep=True)
     data.player.provenance.source_chunk_ids = ["chunk.missing"]
@@ -38,6 +56,33 @@ def test_health_regeneration_cannot_make_baseline_combat_endless(spec):
     data = spec.model_copy(deep=True)
     next(r for r in data.resources if r.id == data.world_rules.health_resource_id).regen = 1000000
     assert any(issue.code == "unkillable_enemy" for issue in validate_realm(data))
+
+
+@pytest.mark.parametrize("mutation", ["cost", "ally_target"])
+def test_default_attack_must_work_on_hostile_targets_without_resource_cost(spec, mutation):
+    data = spec.model_copy(deep=True)
+    attack = data.index()[data.world_rules.default_ability_id]
+    if mutation == "cost": attack.cost = {"resource.energy": 1}
+    else: attack.target = "ally"
+    assert any(issue.code == "invalid_default_attack" for issue in validate_realm(data))
+
+
+def test_heavy_default_action_can_overcome_small_health_regeneration(spec):
+    data = spec.model_copy(deep=True)
+    attack = data.index()[data.world_rules.default_ability_id]
+    attack.effects[0].amount = 20
+    attack.power_scale = 0
+    next(r for r in data.resources if r.id == data.world_rules.health_resource_id).regen = 20
+    assert not any(issue.code == "unkillable_enemy" for issue in validate_realm(data))
+
+
+@pytest.mark.parametrize("mutation", ["overflow", "missing_interior"])
+def test_encounter_sources_must_actually_place_the_declared_actors(spec, mutation):
+    data = spec.model_copy(deep=True)
+    table = data.encounters[0]
+    if mutation == "overflow": table.enemy_counts = {data.enemies[0].id: 1000000}
+    else: table.location_id = "location.refuge"
+    assert any(issue.code == "invalid_spawn" and issue.path == table.id for issue in validate_realm(data))
 
 
 @pytest.mark.parametrize("mutation", [
