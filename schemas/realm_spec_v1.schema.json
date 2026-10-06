@@ -296,10 +296,9 @@
       "additionalProperties": false,
       "properties": {
         "source_identities": {
+          "description": "Exact source identity spellings and abstract roles. Mark distinctive proper names separately from generic concepts; ordinary materials, professions and collective nouns are not protected names.",
           "items": {
-            "maxLength": 4000,
-            "minLength": 1,
-            "type": "string"
+            "$ref": "#/$defs/SourceIdentity"
           },
           "maxItems": 100,
           "title": "Source Identities",
@@ -2757,6 +2756,46 @@
         "training_action"
       ],
       "title": "Skill",
+      "type": "object"
+    },
+    "SourceIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "character",
+            "place",
+            "institution",
+            "artifact",
+            "other"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "proper_name": {
+          "title": "Proper Name",
+          "type": "boolean"
+        },
+        "role": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "kind",
+        "proper_name",
+        "role"
+      ],
+      "title": "SourceIdentity",
       "type": "object"
     },
     "Species": {

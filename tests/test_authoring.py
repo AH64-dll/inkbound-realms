@@ -28,10 +28,18 @@ def test_semantic_source_identities_catch_single_mentions_in_world_prose(fantasy
     p = tmp_path / "book.txt"
     p.write_text("Sen questions a census. Juno maintains a shared station.")
     fantasy_data["metadata"]["adaptation"] = {"mode": "original_inspiration"}
-    fantasy_data["creative_direction"]["interpretation"]["source_identities"] = ["Sen", "Juno"]
+    fantasy_data["creative_direction"]["interpretation"]["source_identities"] = [{"name": name, "kind": "character", "proper_name": True, "role": "A technician maintaining a shared station"} for name in ("Sen", "Juno")]
     fantasy_data["player"]["description"] = "A different surveyor who still reports to Juno."
     issues = originality_issues(RealmSpec.model_validate(fantasy_data), ingest(p))
     assert any(i.code == "source_name_reuse" and i.path == fantasy_data["player"]["id"] for i in issues)
+
+
+def test_generic_source_concepts_do_not_become_prohibited_names(fantasy_data, tmp_path):
+    p = tmp_path / "book.txt"; p.write_text("residents rely on an algorithm to share water.")
+    fantasy_data["metadata"]["adaptation"] = {"mode": "original_inspiration"}
+    fantasy_data["creative_direction"]["interpretation"]["source_identities"] = [{"name": "algorithm", "kind": "other", "proper_name": False, "role": "An automated allocation method"}]
+    fantasy_data["creative_direction"]["world_bible"] = "A pumpwright designs an algorithm for a new community's shared irrigation rights."
+    assert not any(i.code == "source_name_reuse" for i in originality_issues(RealmSpec.model_validate(fantasy_data), ingest(p)))
 
 
 def test_naming_and_repeated_explanations_are_not_four_transformations(fantasy_data, tmp_path):
@@ -158,6 +166,40 @@ def test_reading_analysis_cannot_leak_passages_into_runtime_lore(spec):
     with pytest.raises(ProviderError, match="three attempts"):
         Harness(provider).interpret(book)
     assert provider.counters["interpret_book_chunk"] == 3
+
+
+def test_source_identity_spelling_is_grounded_in_actual_input(spec):
+    book = ingest(Path("fixtures/books") / (spec.metadata.id.split(".")[1] + ".txt"))
+    class InventingReader(FixtureToolProvider):
+        def complete(self, system, prompt, tools):
+            response = super().complete(system, prompt, tools)
+            if tools[0].name == "interpret_book_chunk":
+                response.calls[0].arguments["source_identities"] = [{"name": "Unattested Unique Name", "kind": "character", "proper_name": True, "role": "A caretaker seeking shared authority"}]
+            return response
+    provider = InventingReader(spec)
+    with pytest.raises(ProviderError, match="three attempts"):
+        Harness(provider).interpret(book)
+    assert provider.counters["interpret_book_chunk"] == 3
+
+
+@pytest.mark.parametrize("field", ["main_narrative", "side_narratives", "quality_criteria"])
+def test_new_world_cannot_hide_source_names_outside_the_bible(fantasy_data, tmp_path, field):
+    p = tmp_path / "book.txt"
+    p.write_text("Mara Vale maintains a pump. Mara Vale challenges an unfair tax.")
+    data = RealmSpec.model_validate(fantasy_data)
+    class NameReusingProvider(FixtureToolProvider):
+        def complete(self, system, prompt, tools):
+            response = super().complete(system, prompt, tools)
+            if tools[0].name == "define_world_identity":
+                text = "Mara Vale asks a distant harbor to expose control of its canal ledger."
+                if field == "main_narrative": response.calls[0].arguments[field] = text
+                else: response.calls[0].arguments[field][0] = text
+            return response
+    provider = NameReusingProvider(data)
+    with pytest.raises(ProviderError, match="three attempts"):
+        Harness(provider).compile(ingest(p), realm_id="realm.rejected", seed=42)
+    assert provider.counters["define_world_identity"] == 3
+    assert "define_gameplay_rules" not in provider.counters
 
 
 def test_licensed_names_require_explicit_opt_in(fantasy_data, tmp_path):

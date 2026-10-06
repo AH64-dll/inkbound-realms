@@ -69,7 +69,8 @@ def names_in_text(names, text):
 
 def originality_issues(spec: RealmSpec, book: Book) -> list[Issue]:
     issues = []
-    names = protected_names(book, spec.creative_direction.interpretation.source_identities) if not spec.metadata.adaptation.allow_source_names else set()
+    identities = [identity.name for identity in spec.creative_direction.interpretation.source_identities if identity.proper_name]
+    names = protected_names(book, identities) if not spec.metadata.adaptation.allow_source_names else set()
     content: list[tuple[str, str]] = []
     for entity in spec.entities():
         content.extend([(entity.id, entity.name), (entity.id, entity.description), (entity.id, entity.provenance.rationale)])
@@ -89,7 +90,7 @@ def originality_issues(spec: RealmSpec, book: Book) -> list[Issue]:
     content.extend(("history", h.event) for h in spec.history)
     content.extend(prose_fields(spec.creative_direction.model_dump(mode="json"), "creative_direction"))
     for path, text in content:
-        if path.startswith("creative_direction.interpretation."): continue
+        if path.startswith("creative_direction.interpretation.") or path == "creative_direction.originality_strategy": continue
         if names_in_text(names, text):
             if not any(i.code == "source_name_reuse" and i.path == path for i in issues):
                 issues.append(Issue("source_name_reuse", path, "World prose retains a source identity; describe an original identity or abstract role"))

@@ -52,8 +52,16 @@ class Entity(Model):
     visual: Visual = Field(default_factory=Visual)
 
 
+class SourceIdentity(Model):
+    name: Text
+    kind: Literal["character", "place", "institution", "artifact", "other"]
+    proper_name: bool
+    role: Text
+
+
 class BookInterpretation(Model):
-    source_identities: list[Text] = Field(default_factory=list, max_length=100)
+    source_identities: list[SourceIdentity] = Field(default_factory=list, max_length=100,
+        description="Exact source identity spellings and abstract roles. Mark distinctive proper names separately from generic concepts; ordinary materials, professions and collective nouns are not protected names.")
     summary: Text
     genre: Text
     tone: list[Text] = Field(min_length=1, max_length=12)
