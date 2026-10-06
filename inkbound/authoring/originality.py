@@ -43,11 +43,11 @@ def copied_prose_issues(content, book: Book) -> list[Issue]:
     return issues
 
 
-def protected_names(book: Book) -> set[str]:
+def protected_names(book: Book, source_identities=()) -> set[str]:
     # Sentence-start capitalizations alone aren't names; collect interior/title/frequent candidates.
     candidates = re.findall(r"\b[A-Z][a-z]{2,}(?:[ \t]+[A-Z][a-z]{2,}){0,2}\b", book.text)
     counts = Counter(candidates)
-    names = set()
+    names = {unicodedata.normalize("NFKC", name).casefold().strip() for name in source_identities if name.strip()}
     stop = {"The", "This", "That", "There", "Chapter", "Part", "Book", "She", "They", "His", "Her", "When", "After", "Before", "Beyond", "In", "On", "It", "And", "But"}
     for name in candidates:
         tokens = [t for t in name.split() if t not in stop and t not in {"King", "Queen", "Captain", "Lord", "Lady"}]
@@ -56,9 +56,20 @@ def protected_names(book: Book) -> set[str]:
     return names
 
 
+def transformation_count(transformations):
+    naming = {"name", "names", "naming", "rename", "renaming"}
+    return len({" ".join(words(value)) for key, value in transformations.items()
+                if key.casefold().strip() not in naming and len("".join(words(value))) >= 8})
+
+
+def names_in_text(names, text):
+    text = unicodedata.normalize("NFKC", text).casefold()
+    return [name for name in names if (name in text if cjk_letters(name) else re.search(r"(?<!\w)" + re.escape(name) + r"(?!\w)", text))]
+
+
 def originality_issues(spec: RealmSpec, book: Book) -> list[Issue]:
     issues = []
-    names = protected_names(book) if not spec.metadata.adaptation.allow_source_names else set()
+    names = protected_names(book, spec.creative_direction.interpretation.source_identities) if not spec.metadata.adaptation.allow_source_names else set()
     content: list[tuple[str, str]] = []
     for entity in spec.entities():
         content.extend([(entity.id, entity.name), (entity.id, entity.description), (entity.id, entity.provenance.rationale)])
@@ -70,11 +81,16 @@ def originality_issues(spec: RealmSpec, book: Book) -> list[Issue]:
             for protected in names:
                 if protected == name or protected in name.split() or (len(protected) >= 5 and difflib.SequenceMatcher(None, protected, name).ratio() >= 0.82):
                     issues.append(Issue("source_name_reuse", entity.id, "Name copies or trivially mutates a source identity")); break
-            if spec.metadata.adaptation.mode == "original_inspiration" and len(entity.provenance.transformations) < 4:
+            if spec.metadata.adaptation.mode == "original_inspiration" and transformation_count(entity.provenance.transformations) < 4:
                 issues.append(Issue("shallow_transformation", entity.id, "Explain at least four changed dimensions, beyond naming"))
     for dialogue in spec.dialogues:
         content.extend((dialogue.id, node.text) for node in dialogue.nodes)
         content.extend((dialogue.id, c.text) for node in dialogue.nodes for c in node.choices)
     content.extend(("history", h.event) for h in spec.history)
     content.extend(prose_fields(spec.creative_direction.model_dump(mode="json"), "creative_direction"))
+    for path, text in content:
+        if path.startswith("creative_direction.interpretation."): continue
+        if names_in_text(names, text):
+            if not any(i.code == "source_name_reuse" and i.path == path for i in issues):
+                issues.append(Issue("source_name_reuse", path, "World prose retains a source identity; describe an original identity or abstract role"))
     return issues + copied_prose_issues(content, book)

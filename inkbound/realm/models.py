@@ -53,6 +53,7 @@ class Entity(Model):
 
 
 class BookInterpretation(Model):
+    source_identities: list[Text] = Field(default_factory=list, max_length=100)
     summary: Text
     genre: Text
     tone: list[Text] = Field(min_length=1, max_length=12)

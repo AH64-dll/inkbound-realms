@@ -295,6 +295,16 @@
     "BookInterpretation": {
       "additionalProperties": false,
       "properties": {
+        "source_identities": {
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Source Identities",
+          "type": "array"
+        },
         "summary": {
           "maxLength": 4000,
           "minLength": 1,

@@ -8,7 +8,7 @@ import pytest
 
 from inkbound.authoring.harness import Harness, TOOL_MODELS
 from inkbound.authoring.ingest import ingest
-from inkbound.authoring.originality import originality_issues
+from inkbound.authoring.originality import originality_issues, names_in_text, transformation_count
 from inkbound.authoring.providers import CachedProvider, HTTPProvider, ProviderError, Response, Tool, ToolCall, Usage
 from inkbound.realm.models import AdaptationPolicy, BookInterpretation, RealmSpec
 from inkbound.realm.validation import InvalidRealm
@@ -22,6 +22,29 @@ def test_transformations_required_without_source_names_or_id_prefix(fantasy_data
     fantasy_data["player"]["provenance"]["transformations"] = {"naming": "a changed label"}
     issues = originality_issues(RealmSpec.model_validate(fantasy_data), ingest(path))
     assert any(i.code == "shallow_transformation" and i.path == "protagonist" for i in issues)
+
+
+def test_semantic_source_identities_catch_single_mentions_in_world_prose(fantasy_data, tmp_path):
+    p = tmp_path / "book.txt"
+    p.write_text("Sen questions a census. Juno maintains a shared station.")
+    fantasy_data["metadata"]["adaptation"] = {"mode": "original_inspiration"}
+    fantasy_data["creative_direction"]["interpretation"]["source_identities"] = ["Sen", "Juno"]
+    fantasy_data["player"]["description"] = "A different surveyor who still reports to Juno."
+    issues = originality_issues(RealmSpec.model_validate(fantasy_data), ingest(p))
+    assert any(i.code == "source_name_reuse" and i.path == fantasy_data["player"]["id"] for i in issues)
+
+
+def test_naming_and_repeated_explanations_are_not_four_transformations(fantasy_data, tmp_path):
+    p = tmp_path / "book.txt"; p.write_text("an unnamed city shares its water.")
+    fantasy_data["metadata"]["adaptation"] = {"mode": "original_inspiration"}
+    fantasy_data["player"]["provenance"]["transformations"] = {"naming": "An altered name", "history": "A different life", "motives": "A different life", "role": "A different life"}
+    assert any(i.code == "shallow_transformation" and i.path == fantasy_data["player"]["id"] for i in originality_issues(RealmSpec.model_validate(fantasy_data), ingest(p)))
+
+
+def test_identity_matching_and_transformation_explanations_support_unspaced_languages():
+    assert not names_in_text({"sen"}, "A sensor custodian charts a new settlement.")
+    assert names_in_text({"雨生"}, "雨生守护着这座城市的水源") == ["雨生"]
+    assert transformation_count({"history": "背景改为漂浮港湾的水务争端", "motives": "动机改为维护共同水权和公共责任", "role": "职业改为潮汐测量和水务仲裁", "relationships": "关系改为合作维修和公开决策"}) == 4
 
 
 @pytest.mark.parametrize("text", ["في المدينة القديمة اجتمع السكان حول البئر وقرروا حماية الماء من الحراس قبل حلول المساء", "居民们在没有补给的空间站里共同修复空气循环设备并决定让每一位乘客都能获得公平的生存机会"])
