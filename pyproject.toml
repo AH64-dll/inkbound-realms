@@ -18,6 +18,8 @@ inkbound = "inkbound.cli:main"
 [tool.setuptools.packages.find]
 include = ["inkbound*", "legacy*"]
 
+[tool.setuptools.package-data]
+"legacy.ascii_rpg" = ["config.json", "books/sample.txt", "README.md", "requirements.txt"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-
