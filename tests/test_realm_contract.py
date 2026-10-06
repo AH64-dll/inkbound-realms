@@ -26,6 +26,20 @@ def test_provenance_must_reference_an_ingested_chunk(spec):
     assert any(issue.code == "invalid_provenance" for issue in validate_realm(data))
 
 
+@pytest.mark.parametrize("field,value", [("name", "   "), ("description", "A broken\u0000label")])
+def test_malformed_ui_text_is_rejected_before_play(spec, field, value):
+    data = spec.model_copy(deep=True)
+    setattr(data.player, field, value)
+    with pytest.raises(InvalidRealm, match="malformed_text"):
+        RealmPackage(data)
+
+
+def test_health_regeneration_cannot_make_baseline_combat_endless(spec):
+    data = spec.model_copy(deep=True)
+    next(r for r in data.resources if r.id == data.world_rules.health_resource_id).regen = 1000000
+    assert any(issue.code == "unkillable_enemy" for issue in validate_realm(data))
+
+
 @pytest.mark.parametrize("mutation", [
     lambda d: d.update(realm_spec_version=2),
     lambda d: d.update(engine_script="print('book code')"),

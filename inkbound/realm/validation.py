@@ -27,8 +27,20 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
     def fail(code: str, path: str, message: str, severity: str = "error"):
         issues.append(Issue(code, path, message, severity))
 
+    def check_text(value, path):
+        if isinstance(value, str):
+            if any(ord(char) < 32 and char not in "\n\t" or ord(char) == 127 for char in value):
+                fail("malformed_text", path, "Text contains unsupported control characters")
+        elif isinstance(value, list):
+            for n, child in enumerate(value): check_text(child, f"{path}[{n}]")
+        elif isinstance(value, dict):
+            for key, child in value.items(): check_text(child, f"{path}.{key}")
+
+    check_text(spec.model_dump(mode="json"), "realm")
     seen: set[str] = set()
     for e in spec.entities():
+        if not e.name.strip() or not e.description.strip() or e.visual.glyph.isspace():
+            fail("malformed_text", e.id, "Names, descriptions and fallback glyphs must be visible")
         if e.id in seen:
             fail("duplicate_id", e.id, "IDs must be globally unique")
         seen.add(e.id)
@@ -460,14 +472,17 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
     for enemy in spec.enemies:
         armor = enemy.stats.get(rules.armor_stat_id, 0)
         can_hurt = False
+        regeneration = index[rules.health_resource_id].regen if rules.health_resource_id in groups["resources"] else 0
         for a in usable:
+            turn_damage = 0
             for e in a.effects:
                 if e.kind == "damage":
                     raw = e.amount + a.power_scale * p.stats.get(rules.power_stat_id, 0)
                     resist = enemy.resistances.get(e.damage_type, 0)
-                    can_hurt |= max(1, raw - armor) * (100 - resist) // 100 > 0
+                    turn_damage += max(1, raw - armor) * (100 - resist) // 100
+            can_hurt |= turn_damage > regeneration or turn_damage >= enemy.resources.get(rules.health_resource_id, 1)
         if not can_hurt:
-            fail("unkillable_enemy", enemy.id, "No sustainable player attack can damage this enemy")
+            fail("unkillable_enemy", enemy.id, "No baseline sustainable attack defeats health regeneration or kills in one action")
         if enemy.behavior != "passive":
             enemy_free = [index[aid] for aid in enemy.ability_ids if aid in groups["abilities"] and not any(index[aid].cost.values())]
             if not any(e.kind == "damage" for a in enemy_free for e in a.effects):
