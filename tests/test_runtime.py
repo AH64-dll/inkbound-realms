@@ -6,9 +6,133 @@ from pathlib import Path
 
 import pytest
 
-from inkbound.realm.models import RealmSpec
+from inkbound.realm.models import RealmSpec, Passive, Effect
 from inkbound.realm.package import RealmPackage
 from inkbound.runtime.engine import Engine
+
+
+def test_full_pack_preserves_reward_and_purchase_cannot_create_free_loot(spec, tmp_path):
+    e = Engine(RealmPackage(spec))
+    e.enter("location.home")
+    item = next(iter(e.index["location.home"].market_items))
+    e.state.inventory = {item: e.rules.inventory_capacity}
+    gold = e.state.gold
+    assert not e.buy(item)
+    assert e.state.gold == gold and not e.state.pending_loot
+    record = next(i.id for i in spec.items if i.kind == "artifact")
+    assert not e.add_item(record, 2)
+    path = tmp_path / "full-pack.json"
+    e.save(path)
+    e = Engine.load(e.package, path)
+    e.remove_item(item, 1)
+    assert e.collect_loot()
+    assert e.state.inventory[record] == 1
+    assert sum(drop.items.get(record, 0) for drop in e.state.pending_loot.values()) == 1
+    e.remove_item(item, 1)
+    assert e.collect_loot()
+    assert e.state.inventory[record] == 2 and not e.state.pending_loot
+
+
+def test_main_quest_item_cannot_be_sold_or_spent_on_crafting(spec):
+    data = spec.model_copy(deep=True)
+    record = next(i.id for i in spec.items if i.kind == "artifact")
+    recipe = data.crafting[0].model_copy(deep=True)
+    recipe.id = "recipe.record"
+    recipe.ingredients = {record: 1}
+    # Consuming valuable records does not introduce an infinite resale loop.
+    recipe.gold_cost = 100
+    data.crafting.append(recipe)
+    e = Engine(RealmPackage(data))
+    e.enter("location.home")
+    e.add_item(record, 1)
+    e.state.gold = 1000
+    before = e.state.inventory.copy()
+    assert not e.sell(record)
+    assert not e.craft(recipe.id)
+    assert e.state.inventory == before and e.state.gold == 1000
+
+
+def test_authored_movement_crosses_water_and_round_trips(spec, tmp_path):
+    for mode in ("walk", "sail", "hover"):
+        data = spec.model_copy(deep=True)
+        data.player.movement = mode
+        e = Engine(RealmPackage(data))
+        x, y = e.player.x, e.player.y
+        row = list(e.current_map.grid[y]); row[x + 1] = "~"
+        e.current_map.grid[y] = "".join(row)
+        e.state.actors.clear()
+        assert e.move(1, 0) == (mode != "walk")
+        assert e.player.x == x + (mode != "walk")
+        path = tmp_path / (mode + ".json")
+        e.save(path)
+        assert Engine.load(e.package, path).player.x == e.player.x
+
+
+def test_hostile_summon_remains_hostile_and_player_summon_is_friendly(spec):
+    e = Engine(RealmPackage(spec))
+    enemy = next(iter(e.state.actors.values()))
+    enemy.map_id = e.player.map_id
+    effect = Effect(kind="summon", enemy_id=enemy.definition_id, duration=5)
+    before = set(e.state.actors)
+    e.apply_effect(enemy, e.player, effect)
+    summoned = [e.state.actors[key] for key in set(e.state.actors) - before]
+    assert summoned and all(not actor.friendly for actor in summoned)
+    before = set(e.state.actors)
+    e.apply_effect(e.player, e.player, effect)
+    summoned = [e.state.actors[key] for key in set(e.state.actors) - before]
+    assert summoned and all(actor.friendly for actor in summoned)
+
+
+def test_canonical_package_order_preserves_initial_state(spec, tmp_path):
+    data = spec.model_copy(deep=True)
+    data.player.starting_items = dict(reversed(list(data.player.starting_items.items())))
+    package = RealmPackage(data)
+    package.write(tmp_path / "realm")
+    direct = Engine(package)
+    loaded = Engine(RealmPackage.load(tmp_path / "realm"))
+    assert direct.state.model_dump() == loaded.state.model_dump()
+
+
+@pytest.mark.parametrize("mutation", ["player_clone", "hostile_npc", "unknown_companion"])
+def test_save_rejects_actor_roles_that_would_break_simulation(spec, tmp_path, mutation):
+    e = Engine(RealmPackage(spec))
+    if mutation == "unknown_companion":
+        e.state.companions["npc.missing"] = "location.home"
+    else:
+        actor = next(iter(e.state.actors.values()))
+        actor.definition_id = spec.player.id if mutation == "player_clone" else spec.npcs[0].id
+        actor.friendly = False
+    path = tmp_path / "invalid-role.json"
+    path.write_text(e.state.model_dump_json())
+    with pytest.raises(ValueError, match="Invalid saved"):
+        Engine.load(e.package, path)
+
+
+def test_executable_passives_and_interaction_abilities(spec):
+    data = spec.model_copy(deep=True)
+    data.player.ability_ids.remove("ability.negotiate")
+    data.player.passives = [Passive(id="passive.resilient", name="Practice", description="Maintenance makes the body steadier.", trigger="always", stat_mods={"stat.power": 2}),
+                           Passive(id="passive.discovery", name="Read the surroundings", description="New places restore occupational focus.", trigger="on_visit", resource_gain={"resource.energy": 3})]
+    e = Engine(RealmPackage(data))
+    assert "ability.negotiate" in e.known_abilities()
+    base = Engine(RealmPackage(spec))
+    assert e.stat(e.player, "stat.power") == base.stat(base.player, "stat.power") + 2
+    e.player.resources["resource.energy"] = 0
+    e.visit("location.delve")
+    assert e.player.resources["resource.energy"] == 3
+    e.visit("location.delve")
+    assert e.player.resources["resource.energy"] == 3
+
+
+def test_fixture_passives_restore_configured_resource_and_clamp_to_capacity(spec):
+    e = Engine(RealmPackage(spec))
+    passive = spec.player.passives[0]
+    e.player.resources["resource.energy"] = 0
+    e.passive_event(passive.trigger)
+    assert e.player.resources["resource.energy"] == passive.resource_gain["resource.energy"]
+    e.player.resources["resource.energy"] = e.player.caps["resource.energy"]
+    e.passive_event(passive.trigger)
+    assert e.player.resources["resource.energy"] == e.player.caps["resource.energy"]
 
 
 def test_one_turn_restraint_blocks_reply_and_player_move(spec):

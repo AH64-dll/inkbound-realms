@@ -91,6 +91,7 @@ class Metadata(Model):
     title: Text
     seed: int = Field(ge=0, le=2**63 - 1)
     source_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    source_chunk_ids: list[Id] = Field(default_factory=list)
     source_title: Text
     authoring_provider: Text
     adaptation: AdaptationPolicy = Field(default_factory=AdaptationPolicy)
@@ -185,6 +186,16 @@ class Progression(Entity):
     skill_ids: list[Id] = Field(default_factory=list)
 
 
+class Passive(Model):
+    id: Id
+    name: Text
+    description: Text
+    trigger: Literal["always", "turn", "on_visit", "on_kill", "on_negotiate", "on_rest"]
+    stat_mods: dict[Id, int] = Field(default_factory=dict)
+    resource_gain: dict[Id, Number] = Field(default_factory=dict)
+    resistances: dict[Id, int] = Field(default_factory=dict)
+
+
 class PlayerDefinition(Entity):
     archetype: Text
     background: Text
@@ -198,6 +209,7 @@ class PlayerDefinition(Entity):
     ability_ids: list[Id] = Field(min_length=1)
     interaction_ability_ids: list[Id] = Field(default_factory=list)
     passive_traits: list[Text] = Field(default_factory=list)
+    passives: list[Passive] = Field(default_factory=list, max_length=12)
     special_mechanics: list[Id] = Field(default_factory=list)
     starting_items: dict[Id, Positive] = Field(default_factory=dict)
     vulnerabilities: dict[Id, int] = Field(default_factory=dict)

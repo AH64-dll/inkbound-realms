@@ -31,6 +31,13 @@ class ActorState(Model):
     defeated: bool = False
 
 
+class LootDrop(Model):
+    map_id: str
+    x: int
+    y: int
+    items: dict[str, int]
+
+
 class SaveGame(Model):
     save_game_version: Literal[1] = 1
     package_digest: str
@@ -42,6 +49,7 @@ class SaveGame(Model):
     maps: dict[str, MapData]
     return_stack: list[dict[str, str | int]] = Field(default_factory=list)
     inventory: dict[str, int] = Field(default_factory=dict)
+    pending_loot: dict[str, LootDrop] = Field(default_factory=dict)
     equipment: dict[str, str] = Field(default_factory=dict)
     gold: int = 0
     xp: int = 0
@@ -73,4 +81,3 @@ class SaveGame(Model):
     target_id: str | None = None
     messages: list[str] = Field(default_factory=list)
     annals: list[str] = Field(default_factory=list)
-

@@ -10,7 +10,7 @@ out=Path('artifacts/runtime');out.mkdir(parents=True,exist_ok=True)
 report=[]
 for genre in ['fantasy','horror','science_fiction']:
  e=Engine(RealmPackage(RealmSpec.model_validate_json(Path('fixtures/'+genre+'.json').read_bytes())))
- app=App(e,'/tmp/inkbound-'+genre+'-capture.json');app.sound=False
+ app=App(e,Path('.cache/captures')/genre/'save.json');app.sound=False
  start=time.monotonic()
  for tab in TABS:
   app.tab=tab;app.draw();pg.image.save(app.screen,str(out/(genre+'-'+tab.lower()+'.png')))

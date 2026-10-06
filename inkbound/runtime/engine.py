@@ -10,7 +10,7 @@ from pathlib import Path
 from inkbound.realm.models import Action, Ability, Condition, Effect, EnemyArchetype, PlayerDefinition
 from inkbound.realm.package import RealmPackage, canonical
 from inkbound.runtime.maps import MapData, build_maps, connect, stable_seed
-from inkbound.runtime.state import ActorState, SaveGame
+from inkbound.runtime.state import ActorState, SaveGame, LootDrop
 
 
 class Engine:
@@ -35,7 +35,7 @@ class Engine:
                               visited=[start.id], quests_known=[q.id for q in self.spec.quests if q.discovered],
                               quest_start_turns={q.id: 0 for q in self.spec.quests if q.discovered},
                               annals=[f"Year {h.year}: {h.event}" for h in self.spec.history])
-        for key in list(self.state.inventory):
+        for key in sorted(self.state.inventory):
             item = self.index[key]
             if item.slot_id and item.slot_id not in self.state.equipment:
                 self.equip(key)
@@ -87,12 +87,23 @@ class Engine:
             value += sum(self.index[i].stat_mods.get(key, 0) for i in self.state.equipment.values())
             cls, species = self.spec.player.class_id, self.spec.player.species_id
             value += sum(self.index[eid].stat_mods.get(key, 0) for eid in [cls, species] if eid)
+            value += sum(p.stat_mods.get(key, 0) for p in self.spec.player.passives if p.trigger == "always")
         value += sum(self.index[sid].stat_mods.get(key, 0) for sid in actor.statuses)
         definition = self.index[key]
         return max(definition.minimum, min(definition.maximum, value))
 
     def known_abilities(self) -> list[str]:
-        return list(dict.fromkeys(self.player.abilities + [a for i in self.state.equipment.values() for a in self.index[i].ability_ids]))
+        cls = self.spec.player.class_id
+        class_abilities = self.index[cls].ability_ids if cls else []
+        return list(dict.fromkeys(self.player.abilities + self.spec.player.interaction_ability_ids + class_abilities + [a for slot, i in sorted(self.state.equipment.items()) for a in self.index[i].ability_ids]))
+
+    def passive_event(self, trigger: str):
+        if not self.alive(self.player):
+            return
+        for passive in self.spec.player.passives:
+            if passive.trigger == trigger:
+                for rid, amount in passive.resource_gain.items():
+                    self.player.resources[rid] = min(self.player.caps[rid], self.player.resources[rid] + amount)
 
     def conditions(self, conditions: list[Condition]) -> bool:
         s = self.state
@@ -198,13 +209,46 @@ class Engine:
     def item_count(self, item_id):
         return self.state.inventory.get(item_id, 0) + list(self.state.equipment.values()).count(item_id)
 
-    def add_item(self, item_id: str, count: int):
+    def add_item(self, item_id: str, count: int, *, defer=True, at=None):
         if sum(self.state.inventory.values()) + count > self.rules.inventory_capacity:
-            self.log(f"Pack full: left {self.index[item_id].name} behind.")
+            if defer:
+                at = at or self.player
+                key = f"{at.map_id}:{at.x}:{at.y}"
+                drop = self.state.pending_loot.setdefault(key, LootDrop(map_id=at.map_id, x=at.x, y=at.y, items={}))
+                drop.items[item_id] = drop.items.get(item_id, 0) + count
+                self.log(f"Pack full: {self.index[item_id].name} waits at ({at.x}, {at.y}). E collects it when space is free.")
+            else:
+                self.log("Pack full.")
             return False
         self.state.inventory[item_id] = self.state.inventory.get(item_id, 0) + count
         self.log(f"Obtained {count} {self.index[item_id].name}.")
         return True
+
+    def collect_loot(self):
+        if not self.alive(self.player): return False
+        nearby = [(key, drop) for key, drop in self.state.pending_loot.items() if drop.map_id == self.player.map_id and abs(drop.x - self.player.x) + abs(drop.y - self.player.y) <= 1]
+        if not nearby: return False
+        for key, drop in sorted(nearby):
+            for item_id, count in sorted(drop.items.items()):
+                room = self.rules.inventory_capacity - sum(self.state.inventory.values())
+                n = min(count, room)
+                if n > 0:
+                    self.add_item(item_id, n, defer=False)
+                    drop.items[item_id] -= n
+                    if not drop.items[item_id]: del drop.items[item_id]
+            if not drop.items: del self.state.pending_loot[key]
+        if any(key in self.state.pending_loot for key, _ in nearby): self.log("Free pack space to collect any remaining finds.")
+        return True
+
+    def reserved_item_count(self, item_id):
+        consuming = 0; retained = 0
+        for quest in self.spec.quests:
+            if quest.main and quest.id not in self.state.quests_done + self.state.quests_failed:
+                for obj in quest.objectives:
+                    if obj.kind == "collect" and obj.target_id == item_id:
+                        if obj.consume: consuming += obj.count
+                        else: retained = max(retained, obj.count)
+        return consuming + retained
 
     def remove_item(self, item_id, count):
         if count > self.item_count(item_id):
@@ -287,7 +331,7 @@ class Engine:
         if self.restrained():
             return True
         x, y = self.player.x + dx, self.player.y + dy
-        if not self.current_map.walkable(x, y):
+        if not self.player_walkable(self.player.map_id, x, y):
             self.log("Blocked."); return False
         if any(a.map_id == self.player.map_id and a.x == x and a.y == y and self.alive(a) and not a.friendly for a in self.state.actors.values()):
             self.log("A threat holds that tile. Attack, offer terms or retreat."); return False
@@ -304,6 +348,19 @@ class Engine:
         self._companions_follow()
         self.tick()
         return True
+
+    def player_walkable(self, map_id, x, y):
+        m = self.state.maps[map_id]
+        if not 0 <= y < len(m.grid) or not 0 <= x < len(m.grid[0]): return False
+        definition = self.index.get(map_id)
+        water = m.grid[y][x] == "~" or (getattr(definition, "generator", None) == "nautical" and m.grid[y][x] == ",")
+        if water: return self.spec.player.movement in ("sail", "hover")
+        return m.walkable(x, y)
+
+    def actor_walkable(self, actor, x, y):
+        if actor is self.player or actor.friendly and actor.definition_id in {n.id for n in self.spec.npcs}:
+            return self.player_walkable(actor.map_id, x, y)
+        return self.state.maps[actor.map_id].walkable(x, y)
 
     def _maybe_expand(self):
         region = self.index.get(self.player.map_id)
@@ -341,6 +398,8 @@ class Engine:
         for actor in [self.player, *self.state.actors.values()]:
             if actor.map_id == m.id:
                 actor.x += sx; actor.y += sy
+        for drop in self.state.pending_loot.values():
+            if drop.map_id == m.id: drop.x += sx; drop.y += sy
         m.entrance = [m.entrance[0] + sx, m.entrance[1] + sy]
         m.points = {eid: [xy[0] + sx, xy[1] + sy] for eid, xy in m.points.items()}
         m.origin = [x0 - sx, y0 - sy]
@@ -363,6 +422,7 @@ class Engine:
             self.log(f"Discovered {loc.name}. {loc.lore}")
             self.grant_actions(loc.entry_actions)
             self.gain_xp(5)
+            self.passive_event("on_visit")
 
     def enter(self, location_id: str | None = None) -> bool:
         if not self.alive(self.player):
@@ -425,6 +485,9 @@ class Engine:
         return True
 
     def interact(self):
+        if not self.alive(self.player): return False
+        if self.collect_loot():
+            return True
         if self.state.active_dialogue_id:
             return False
         if self.player.map_id in {r.id for r in self.spec.regions}:
@@ -465,7 +528,10 @@ class Engine:
             return False
         if npc_id not in self.state.talked:
             self.state.talked.append(npc_id)
-        self.train("talk")
+        practice_key = f"practice.talk.{npc_id}.{self.day}"
+        if not self.state.flags.get(practice_key):
+            self.state.flags[practice_key] = 1
+            self.train("talk")
         for quest in self.spec.quests:
             if quest.giver_id == npc_id and set(quest.prerequisites) <= set(self.state.quests_done):
                 self.discover_quest(quest.id)
@@ -553,6 +619,7 @@ class Engine:
                 if actor:
                     actor.defeated = False; actor.resources = dict(actor.caps); actor.statuses.clear()
                     actor.map_id = self.player.map_id; actor.x, actor.y = self.player.x, self.player.y
+        self.passive_event("on_rest")
         self.train("rest"); self.log("Rested at the hearth." if safe else "Rested on the road; the wilds did not stop.")
         return True
 
@@ -584,7 +651,7 @@ class Engine:
         bought = self.state.flags.get(stock_key, 0)
         if bought >= loc.market_items[item_id] or self.state.gold < cost:
             return False
-        if not self.add_item(item_id, 1):
+        if not self.add_item(item_id, 1, defer=False):
             return False
         self.state.gold -= cost; self.state.flags[stock_key] = bought + 1
         return True
@@ -593,6 +660,8 @@ class Engine:
         loc = self.location_here()
         if not loc or loc.kind != "settlement" or self.state.inventory.get(item_id, 0) < 1:
             return False
+        if self.item_count(item_id) - 1 < self.reserved_item_count(item_id):
+            self.log("Keep this item: an unfinished main tale needs it."); return False
         self.remove_item(item_id, 1); self.state.gold += self.price(item_id, False)
         self.log(f"Sold {self.index[item_id].name}.")
         return True
@@ -605,6 +674,8 @@ class Engine:
             return False
         if self.state.gold < recipe.gold_cost or any(self.state.inventory.get(eid, 0) < n for eid, n in recipe.ingredients.items()):
             self.log("Missing crafting materials."); return False
+        if any(self.item_count(eid) - n < self.reserved_item_count(eid) for eid, n in recipe.ingredients.items()):
+            self.log("An unfinished main tale needs these materials."); return False
         pack_after = sum(self.state.inventory.values()) - sum(recipe.ingredients.values()) + sum(recipe.outputs.values())
         if pack_after > self.rules.inventory_capacity:
             return False
@@ -681,7 +752,7 @@ class Engine:
             for map_id in keys:
                 if map_id not in self.state.maps:
                     continue
-                for enemy_id, count in table.enemy_counts.items():
+                for enemy_id, count in sorted(table.enemy_counts.items()):
                     enemy = self.index[enemy_id]
                     if enemy.role == "boss" and map_id != keys[-1]:
                         continue
@@ -766,6 +837,7 @@ class Engine:
         vulnerable = definition.vulnerabilities.get(damage_type, 0)
         if target is self.player:
             resist = min(100, resist + sum(self.index[i].resistances.get(damage_type, 0) for i in self.state.equipment.values()))
+            resist = min(100, resist + sum(p.resistances.get(damage_type, 0) for p in self.spec.player.passives if p.trigger == "always"))
         amount = amount * (100 + vulnerable) // 100 * (100 - resist) // 100
         if target.guard:
             amount = max(1, amount // 4) if amount else 0
@@ -808,13 +880,13 @@ class Engine:
                     dx, dy = (1 if dx > 0 else -1 if dx < 0 else 0, 0) if abs(dx) >= abs(dy) else (0, 1 if dy > 0 else -1)
                 else:
                     dx, dy = rng.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
-                if self.state.maps[actor.map_id].walkable(actor.x + dx, actor.y + dy):
+                if self.actor_walkable(actor, actor.x + dx, actor.y + dy):
                     actor.x += dx; actor.y += dy
         elif effect.kind == "summon":
             before = set(self.state.actors)
             self.spawn(effect.enemy_id, attacker.map_id, 1, "summon", self.state.rng_counter)
             for aid in set(self.state.actors) - before:
-                ally = self.state.actors[aid]; ally.friendly = True; ally.ally_until = self.state.turn + effect.duration
+                ally = self.state.actors[aid]; ally.friendly = attacker is self.player or attacker.friendly; ally.ally_until = self.state.turn + effect.duration
                 candidates = sorted(self.current_map.reachable(), key=lambda xy: (abs(xy[0] - attacker.x) + abs(xy[1] - attacker.y), xy))
                 ally.x, ally.y = candidates[min(1, len(candidates) - 1)]
         elif effect.kind == "reveal":
@@ -833,20 +905,22 @@ class Engine:
         if target.defeated:
             return
         target.defeated = True
+        if self.state.target_id == target.id: self.state.target_id = None
         if target.friendly:
             return
         definition = self.index[target.definition_id]
         self.state.kills[definition.id] = self.state.kills.get(definition.id, 0) + 1
         self.state.gold += definition.gold
         self.gain_xp(definition.xp)
-        for eid, n in definition.loot.items():
+        for eid, n in sorted(definition.loot.items()):
             if n:
-                self.add_item(eid, n)
+                self.add_item(eid, n, at=target)
         if definition.faction_id:
             self.state.standing[definition.faction_id] = self.state.standing.get(definition.faction_id, 0) + (1 if negotiated else -2)
             for fid, relation in self.index[definition.faction_id].relationships.items():
                 self.state.standing[fid] = self.state.standing.get(fid, 0) + (-1 if relation > 0 else 1)
         self.player.winded = False
+        self.passive_event("on_negotiate" if negotiated else "on_kill")
         self.log(f"Resolved {definition.name}. +{definition.xp} experience.")
 
     def defend(self):
@@ -864,6 +938,8 @@ class Engine:
         item = self.index[item_id]
         if item.kind != "consumable":
             return self.equip(item_id)
+        if self.item_count(item_id) - 1 < self.reserved_item_count(item_id):
+            self.log("An unfinished main tale needs this item."); return False
         if any(e.kind in ("damage", "status", "push", "negotiate") for e in item.effects):
             targets = self.threats()
             target = next((a for a in targets if a.id == self.state.target_id), targets[0] if targets else None)
@@ -888,7 +964,7 @@ class Engine:
         if self.rng().randrange(100) < chance:
             for _ in range(3):
                 candidates = [(self.player.x + dx, self.player.y + dy) for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]
-                              if self.current_map.walkable(self.player.x + dx, self.player.y + dy)]
+                              if self.player_walkable(self.player.map_id, self.player.x + dx, self.player.y + dy)]
                 if candidates:
                     self.player.x, self.player.y = max(candidates, key=lambda xy: (min(abs(xy[0] - a.x) + abs(xy[1] - a.y) for a in threats), xy))
             self.player.winded = False; self.log("Disengaged into clearer ground."); self.tick(enemies=False)
@@ -911,7 +987,7 @@ class Engine:
         m = self.state.maps[actor.map_id]
         occupied = {(a.x, a.y) for a in [self.player, *self.state.actors.values()] if a.id != actor.id and a.map_id == actor.map_id and self.alive(a)}
         choices = [(actor.x + dx, actor.y + dy) for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]
-                   if m.walkable(actor.x + dx, actor.y + dy) and (actor.x + dx, actor.y + dy) not in occupied]
+                   if self.actor_walkable(actor, actor.x + dx, actor.y + dy) and (actor.x + dx, actor.y + dy) not in occupied]
         if choices:
             key = lambda xy: (abs(xy[0] - target.x) + abs(xy[1] - target.y), xy)
             actor.x, actor.y = (max if retreat else min)(choices, key=key)
@@ -966,10 +1042,11 @@ class Engine:
         for actor in [self.player, *sorted(self.state.actors.values(), key=lambda a: a.id)]:
             if not self.alive(actor):
                 continue
+            for r in self.spec.resources:
+                if r.id in actor.resources:
+                    actor.resources[r.id] = min(actor.caps[r.id], actor.resources[r.id] + r.regen)
             if actor is self.player:
-                for r in self.spec.resources:
-                    if r.id in actor.resources and r.id != self.health_id:
-                        actor.resources[r.id] = min(actor.caps[r.id], actor.resources[r.id] + r.regen)
+                self.passive_event("turn")
             if actor.ally_until and actor.ally_until <= self.state.turn:
                 actor.defeated = True; continue
             for sid in list(actor.statuses):
@@ -1014,7 +1091,9 @@ class Engine:
         stats = {x.id for x in self.spec.stats}; resources = {x.id for x in self.spec.resources}
         statuses = {x.id for x in self.spec.status_effects}; abilities = {x.id for x in self.spec.abilities}
         for actor in [s.player, *s.actors.values()]:
-            if actor.definition_id not in actor_definitions or actor.map_id not in s.maps or not s.maps[actor.map_id].walkable(actor.x, actor.y):
+            valid_position = actor.map_id in s.maps and self.actor_walkable(actor, actor.x, actor.y)
+            valid_definition = actor.definition_id == self.spec.player.id if actor is s.player else actor.definition_id in actor_definitions - {self.spec.player.id}
+            if not valid_definition or not valid_position or (actor is not s.player and actor.definition_id in {n.id for n in self.spec.npcs} and not actor.friendly):
                 raise ValueError("Invalid saved actor location/definition")
             if actor is s.player and actor.definition_id != self.spec.player.id:
                 raise ValueError("Invalid player definition")
@@ -1030,6 +1109,11 @@ class Engine:
             raise ValueError("Invalid saved actor IDs")
         if any(eid not in {i.id for i in self.spec.items} or n <= 0 for eid, n in s.inventory.items()):
             raise ValueError("Invalid saved inventory")
+        for drop in s.pending_loot.values():
+            if drop.map_id not in s.maps or not self.player_walkable(drop.map_id, drop.x, drop.y) or any(eid not in {i.id for i in self.spec.items} or n <= 0 for eid, n in drop.items.items()):
+                raise ValueError("Invalid saved pending loot")
+        if not set(s.companions) <= {n.id for n in self.spec.npcs} or not set(s.companions.values()) <= {loc.id for loc in self.spec.locations}:
+            raise ValueError("Invalid saved companion references")
         if any(slot not in self.spec.player.equipment_slots or eid not in self.index or self.index[eid].slot_id != slot for slot, eid in s.equipment.items()):
             raise ValueError("Invalid saved equipment")
         quests = {q.id for q in self.spec.quests}

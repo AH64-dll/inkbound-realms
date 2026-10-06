@@ -11,11 +11,12 @@ from inkbound.realm.package import RealmPackage, safe_file
 class Assets:
     def __init__(self, package: RealmPackage):
         self.package = package
+        self.definitions = {asset.id: asset for asset in package.spec.assets}
         self.images = {}; self.sounds = {}
         self.font_path = None; self.accent = None
         self.loop_started = False
         if package.root is None: return
-        for asset in package.spec.assets:
+        for asset in self.definitions.values():
             if not asset.path: continue
             path = safe_file(package.root, asset.path)
             try:
@@ -37,7 +38,7 @@ class Assets:
         aid = next((x for x in entity.visual.animation_ids if x in self.images), entity.visual.asset_id)
         source = self.images.get(aid)
         if source is None: return None
-        asset = next(a for a in self.package.spec.assets if a.id == aid)
+        asset = self.definitions[aid]
         if asset.kind == "animation" and asset.animation_frames > 1:
             width = source.get_width() // asset.animation_frames
             if width > 0:
@@ -50,13 +51,13 @@ class Assets:
             for sound in self.sounds.values(): sound.stop()
             self.loop_started = False
         elif not self.loop_started:
-            for asset in self.package.spec.assets:
+            for asset in self.definitions.values():
                 if asset.kind in ("ambient", "music") and asset.id in self.sounds:
                     self.sounds[asset.id].play(loops=-1)
             self.loop_started = True
 
     def combat(self):
-        for asset in self.package.spec.assets:
+        for asset in self.definitions.values():
             if asset.kind == "combat_sound" and asset.id in self.sounds:
                 self.sounds[asset.id].play(); return True
         return False

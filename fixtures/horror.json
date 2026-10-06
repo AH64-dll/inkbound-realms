@@ -5,6 +5,9 @@
     "title": "The House That Kept the Weather",
     "seed": 42,
     "source_digest": "6b28b921ac01a46bed554708759a9010ab5fbc90d4d721876e26d18f89300b88",
+    "source_chunk_ids": [
+      "chunk.0000"
+    ],
     "source_title": "The House That Kept the Weather — original fixture story",
     "authoring_provider": "hand-authored fixture",
     "adaptation": {
@@ -16,7 +19,7 @@
   },
   "creative_direction": {
     "interpretation": {
-      "summary": "Ada returned to Lastlight Ward with a hearing trumpet and a lantern she kept hooded. In the house above the orchard, the barometer never fell even when rain broke the windows. Bess had stayed to listen to those nobody else could bear to hear. Now their names were fading from the ward book. The rooms were warm because a keeper refused to let grief step outside. Ada did not come to defeat a monster with a sword. She came to witness the absences, to share the weight of a name, and to find a door that could open without forgetting.",
+      "summary": "A house makes exclusion material through remembered weather. A witness gathers suppressed testimony and confronts the household's steward, balancing the need to listen against the cost of keeping composure.",
       "genre": "domestic psychological horror",
       "tone": [
         "claustrophobic",
@@ -64,7 +67,7 @@
         "Master occupational tools"
       ]
     },
-    "world_bible": "Ada returned to Lastlight Ward with a hearing trumpet and a lantern she kept hooded. In the house above the orchard, the barometer never fell even when rain broke the windows. Bess had stayed to listen to those nobody else could bear to hear. Now their names were fading from the ward book. The rooms were warm because a keeper refused to let grief step outside. Ada did not come to defeat a monster with a sword. She came to witness the absences, to share the weight of a name, and to find a door that could open without forgetting.",
+    "world_bible": "The Held Valley is a wet orchards, fogbound lanes and an unlit hillside. A house makes exclusion material through remembered weather. A witness gathers suppressed testimony and confronts the household's steward, balancing the need to listen against the cost of keeping composure. Neighbors take turns hearing testimony beside covered lamps. The central institution remains dangerous because a caretaker made from the house's repeated refusals to let its residents leave. The protagonist is a night witness with a working relationship to a night attendant; occupational tools and recovered records provide ways to change that institution.",
     "gameplay_identity": "Play a night witness, recover contested records, use occupational tools or negotiate, and turn discoveries into institutional change.",
     "originality_strategy": "Independent original fixture story and cast; no external book adaptation.",
     "main_narrative": "Release the house's inhabitants without erasing the loss that binds them.",
@@ -168,6 +171,19 @@
     ],
     "passive_traits": [
       "Learns from maintaining rather than conquering"
+    ],
+    "passives": [
+      {
+        "id": "passive.occupation",
+        "name": "A witness heard",
+        "description": "Peaceful resolutions restore two composure.",
+        "trigger": "on_negotiate",
+        "stat_mods": {},
+        "resource_gain": {
+          "resource.energy": 2
+        },
+        "resistances": {}
+      }
     ],
     "special_mechanics": [
       "negotiation",

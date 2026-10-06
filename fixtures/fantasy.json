@@ -5,6 +5,9 @@
     "title": "The Saltglass Covenant",
     "seed": 42,
     "source_digest": "15614b6b47d0ea8fcb4a701b7a8cee29c4b15cc1f45829cf4d075405d4ee55c1",
+    "source_chunk_ids": [
+      "chunk.0000"
+    ],
     "source_title": "The Saltglass Covenant — original fixture story",
     "authoring_provider": "hand-authored fixture",
     "adaptation": {
@@ -16,7 +19,7 @@
   },
   "creative_direction": {
     "interpretation": {
-      "summary": "The tide was a common road until the levy syndicate began measuring it as property. Surveyor Iven watched the pumps at Knotmarket fail under a tariff nobody had voted for. The drowned registry held the last communal ledger. Mara, who mended pumps without asking a name, warned that the old metering warden still obeyed claims from a vanished age. Iven's lens could shift a little water, but each working blurred a memory. They would have to choose which debts a town ought to remember, and which gates it could afford to open.",
+      "summary": "A community's flood system is becoming an instrument of private debt. A working surveyor and a repair collective recover evidence of shared water rights to challenge a controller enforcing obsolete claims.",
       "genre": "maritime ecological fantasy",
       "tone": [
         "salt-worn",
@@ -64,7 +67,7 @@
         "Master occupational tools"
       ]
     },
-    "world_bible": "The tide was a common road until the levy syndicate began measuring it as property. Surveyor Iven watched the pumps at Knotmarket fail under a tariff nobody had voted for. The drowned registry held the last communal ledger. Mara, who mended pumps without asking a name, warned that the old metering warden still obeyed claims from a vanished age. Iven's lens could shift a little water, but each working blurred a memory. They would have to choose which debts a town ought to remember, and which gates it could afford to open.",
+    "world_bible": "The Glasswater Reach is a tidal forest and fractured salt marsh. A community's flood system is becoming an instrument of private debt. A working surveyor and a repair collective recover evidence of shared water rights to challenge a controller enforcing obsolete claims. Crews record debts in rope knots and settle disagreements at ebb tide. The central institution remains dangerous because an automaton built to ration floods; it obeys obsolete property claims at the closed sluice. The protagonist is a tide surveyor with a working relationship to a harbor pumpwright; occupational tools and recovered records provide ways to change that institution.",
     "gameplay_identity": "Play a tide surveyor, recover contested records, use occupational tools or negotiate, and turn discoveries into institutional change.",
     "originality_strategy": "Independent original fixture story and cast; no external book adaptation.",
     "main_narrative": "Reopen the common sluice without handing its control to the levy syndicate.",
@@ -168,6 +171,19 @@
     ],
     "passive_traits": [
       "Learns from maintaining rather than conquering"
+    ],
+    "passives": [
+      {
+        "id": "passive.occupation",
+        "name": "Read the current",
+        "description": "New landmarks restore one tidal focus.",
+        "trigger": "on_visit",
+        "stat_mods": {},
+        "resource_gain": {
+          "resource.energy": 1
+        },
+        "resistances": {}
+      }
     ],
     "special_mechanics": [
       "negotiation",

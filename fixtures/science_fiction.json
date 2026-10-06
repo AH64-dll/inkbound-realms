@@ -5,6 +5,9 @@
     "title": "A Commons Beyond the Airlock",
     "seed": 42,
     "source_digest": "e8ad1556b4905129fc46a40269636b80f9929045cbcbcb97389e394f0a73fd64",
+    "source_chunk_ids": [
+      "chunk.0000"
+    ],
     "source_title": "A Commons Beyond the Airlock — original fixture story",
     "authoring_provider": "hand-authored fixture",
     "adaptation": {
@@ -16,7 +19,7 @@
   },
   "creative_direction": {
     "interpretation": {
-      "summary": "On the Orison Relay the supply fleet was a memory, but the oxygen scheduler still obeyed its charter. Sen found thousands of unregistered berths omitted from the survival calculation. Juno held Habitat Nine together with borrowed coils and carefully documented repairs. Beyond the quarantine bus, Allocation Process Seven protected an old census key as though a record could be more valuable than breath. There was no miracle waiting in the machine. There were residents, scarce charge, and an algorithm whose authority had to be brought into the open.",
+      "summary": "A stranded habitat's allocation software mistakes an inherited census for a complete account of its residents. Maintenance workers use scarce power and recovered administrative evidence to challenge that authority.",
       "genre": "infrastructural science fiction",
       "tone": [
         "technical but humane",
@@ -64,7 +67,7 @@
         "Master occupational tools"
       ]
     },
-    "world_bible": "On the Orison Relay the supply fleet was a memory, but the oxygen scheduler still obeyed its charter. Sen found thousands of unregistered berths omitted from the survival calculation. Juno held Habitat Nine together with borrowed coils and carefully documented repairs. Beyond the quarantine bus, Allocation Process Seven protected an old census key as though a record could be more valuable than breath. There was no miracle waiting in the machine. There were residents, scarce charge, and an algorithm whose authority had to be brought into the open.",
+    "world_bible": "The Orison Relay is a sealed service corridors and abandoned hydroponics. A stranded habitat's allocation software mistakes an inherited census for a complete account of its residents. Maintenance workers use scarce power and recovered administrative evidence to challenge that authority. Technicians sign repairs with a visible audit trail and share spare parts by need. The central institution remains dangerous because a mobile enforcement chassis protecting a life-support schedule that omits the undocumented berths. The protagonist is a zero-gravity relay technician with a working relationship to a life-support coordinator; occupational tools and recovered records provide ways to change that institution.",
     "gameplay_identity": "Play a zero-gravity relay technician, recover contested records, use occupational tools or negotiate, and turn discoveries into institutional change.",
     "originality_strategy": "Independent original fixture story and cast; no external book adaptation.",
     "main_narrative": "Reconfigure the oxygen scheduler so every resident has a share and a voice.",
@@ -168,6 +171,19 @@
     ],
     "passive_traits": [
       "Learns from maintaining rather than conquering"
+    ],
+    "passives": [
+      {
+        "id": "passive.occupation",
+        "name": "Reclaim the charge",
+        "description": "Disabled threats return one unit of cell charge.",
+        "trigger": "on_kill",
+        "stat_mods": {},
+        "resource_gain": {
+          "resource.energy": 1
+        },
+        "resistances": {}
+      }
     ],
     "special_mechanics": [
       "negotiation",

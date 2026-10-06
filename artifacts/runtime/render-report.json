@@ -1,20 +1,20 @@
 [
   {
     "genre": "fantasy",
-    "mean_draw_ms": 3.72,
-    "max_draw_ms": 6.242,
+    "mean_draw_ms": 4.577,
+    "max_draw_ms": 7.147,
     "turn_unchanged_by_30_frames": true
   },
   {
     "genre": "horror",
-    "mean_draw_ms": 3.888,
-    "max_draw_ms": 6.881,
+    "mean_draw_ms": 4.935,
+    "max_draw_ms": 8.433,
     "turn_unchanged_by_30_frames": true
   },
   {
     "genre": "science_fiction",
-    "mean_draw_ms": 3.484,
-    "max_draw_ms": 5.513,
+    "mean_draw_ms": 6.349,
+    "max_draw_ms": 8.249,
     "turn_unchanged_by_30_frames": true
   }
 ]

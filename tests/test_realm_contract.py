@@ -20,6 +20,12 @@ def test_all_genres_validate_and_roundtrip(spec):
     jsonschema.validate(json.loads(encoded), schema)
 
 
+def test_provenance_must_reference_an_ingested_chunk(spec):
+    data = spec.model_copy(deep=True)
+    data.player.provenance.source_chunk_ids = ["chunk.missing"]
+    assert any(issue.code == "invalid_provenance" for issue in validate_realm(data))
+
+
 @pytest.mark.parametrize("mutation", [
     lambda d: d.update(realm_spec_version=2),
     lambda d: d.update(engine_script="print('book code')"),
@@ -151,3 +157,27 @@ def test_location_overlap_and_unfundable_payment_rejected(fantasy_data):
         encounter["respawn_turns"] = 0
     codes = {i.code for i in validate_realm(RealmSpec.model_validate(fantasy_data))}
     assert {"overlapping_locations", "impossible_economy"} <= codes
+
+
+def test_package_snapshot_and_optional_v1_fields_preserve_identity(spec, tmp_path):
+    import hashlib
+    package = RealmPackage(spec)
+    original_name = package.spec.player.name
+    digest = package.digest
+    spec.player.name = "An external mutable edit"
+    copy = package.spec; copy.player.name = "A temporary working copy"
+    assert package.spec.player.name == original_name and package.digest == digest
+    path = package.write(tmp_path / "v1")
+    data = json.loads((path / "realm.json").read_text())
+    data["player"].pop("passives")
+    raw = json.dumps(data, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()
+    (path / "realm.json").write_bytes(raw)
+    manifest = json.loads((path / "manifest.json").read_text())
+    manifest["spec_sha256"] = hashlib.sha256(raw).hexdigest()
+    (path / "manifest.json").write_text(json.dumps(manifest))
+    restored = RealmPackage.load(path)
+    assert restored.spec.player.passives == []
+    assert restored.digest == manifest["spec_sha256"]
+    copied = restored.write(tmp_path / "copy")
+    assert (copied / "realm.json").read_bytes() == raw
+    assert RealmPackage.load(copied).digest == restored.digest

@@ -1622,6 +1622,14 @@
           "title": "Source Digest",
           "type": "string"
         },
+        "source_chunk_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "title": "Source Chunk Ids",
+          "type": "array"
+        },
         "source_title": {
           "maxLength": 4000,
           "minLength": 1,
@@ -1884,6 +1892,77 @@
       "title": "Objective",
       "type": "object"
     },
+    "Passive": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "trigger": {
+          "enum": [
+            "always",
+            "turn",
+            "on_visit",
+            "on_kill",
+            "on_negotiate",
+            "on_rest"
+          ],
+          "title": "Trigger",
+          "type": "string"
+        },
+        "stat_mods": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "type": "integer"
+            }
+          },
+          "title": "Stat Mods",
+          "type": "object"
+        },
+        "resource_gain": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "maximum": 1000000,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "title": "Resource Gain",
+          "type": "object"
+        },
+        "resistances": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "type": "integer"
+            }
+          },
+          "title": "Resistances",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "trigger"
+      ],
+      "title": "Passive",
+      "type": "object"
+    },
     "PlayerDefinition": {
       "additionalProperties": false,
       "properties": {
@@ -2012,6 +2091,14 @@
             "type": "string"
           },
           "title": "Passive Traits",
+          "type": "array"
+        },
+        "passives": {
+          "items": {
+            "$ref": "#/$defs/Passive"
+          },
+          "maxItems": 12,
+          "title": "Passives",
           "type": "array"
         },
         "special_mechanics": {

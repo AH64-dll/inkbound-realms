@@ -105,6 +105,18 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
         fail("invalid_player", "player.abilities", "Player must know the default attack")
     if not set(p.special_mechanics) <= set(rules.supported_mechanics):
         fail("unsupported_mechanics", "player.special_mechanics", "Engine cannot implement requested mechanics")
+    if len({x.id for x in p.passives}) != len(p.passives):
+        fail("duplicate_passive", p.id, "Passive IDs must be unique within the player")
+    for passive in p.passives:
+        refs(passive.stat_mods, "stats", passive.id)
+        refs(passive.resource_gain, "resources", passive.id)
+        refs(passive.resistances, "damage_types", passive.id)
+        if not passive.stat_mods and not passive.resistances and not any(passive.resource_gain.values()):
+            fail("ineffective_passive", passive.id, "Passive needs an executable effect")
+        if passive.trigger == "always" and passive.resource_gain or passive.trigger != "always" and (passive.stat_mods or passive.resistances):
+            fail("invalid_passive", passive.id, "Always supports stat/affinity modifiers; event triggers support resource gains")
+        if any(rid not in p.resources for rid in passive.resource_gain) or any(not 0 <= n <= 100 for n in passive.resistances.values()):
+            fail("invalid_passive", passive.id, "Resource gain or resistance is incompatible with the player")
 
     for actor in [p, *spec.enemies]:
         refs(actor.stats, "stats", actor.id); refs(actor.resources, "resources", actor.id)
@@ -120,7 +132,11 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
         for key, value in actor.vulnerabilities.items():
             if not 0 <= value <= 200:
                 fail("invalid_vulnerability", actor.id, f"{key}: use 0..200 percent")
-        for aid in actor.ability_ids:
+        actor_abilities = list(actor.ability_ids)
+        if actor is p:
+            actor_abilities += p.interaction_ability_ids
+            if p.class_id in groups["classes"]: actor_abilities += index[p.class_id].ability_ids
+        for aid in actor_abilities:
             ability = index.get(aid)
             if aid in groups["abilities"] and any(rid not in actor.resources or cost > actor.resources[rid] for rid, cost in ability.cost.items()):
                 fail("unsupported_ability", actor.id, f"Cannot pay the cost of {aid}")
@@ -134,6 +150,8 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
             effect(e, a.id)
         if a.target == "self" and any(e.kind in ("damage", "negotiate") for e in a.effects):
             fail("invalid_target", a.id, "Self damage/negotiation is not supported")
+        if a.target == "ally" and any(e.kind == "negotiate" for e in a.effects):
+            fail("invalid_target", a.id, "Negotiation requires a hostile target")
     for status in spec.status_effects:
         refs(status.stat_mods, "stats", status.id)
         if status.tick_damage:
@@ -455,6 +473,8 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
             if not any(e.kind == "damage" for a in enemy_free for e in a.effects):
                 fail("zero_damage_loop", enemy.id, "Hostile enemy needs a sustainable damaging ability")
     for entity in spec.entities():
+        if spec.metadata.source_chunk_ids and not set(entity.provenance.source_chunk_ids) <= set(spec.metadata.source_chunk_ids):
+            fail("invalid_provenance", entity.id, "Provenance cites an unknown source chunk")
         if entity.visual.asset_id:
             ref(entity.visual.asset_id, "assets", entity.id)
         refs(entity.visual.animation_ids, "assets", entity.id)

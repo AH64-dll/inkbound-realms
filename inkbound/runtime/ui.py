@@ -148,6 +148,9 @@ class App:
                 self.text("!", 6 + (actor.x - x0) * self.tile, 34 + (actor.y - y0) * self.tile, self.tile, THEME["gold"], self.tiny)
             if actor.id == e.state.target_id:
                 pg.draw.rect(self.screen, THEME["gold"], (6 + (actor.x - x0) * self.tile, 40 + (actor.y - y0) * self.tile, self.tile, self.tile), 1)
+        for drop in e.state.pending_loot.values():
+            if drop.map_id == p.map_id:
+                self.text("$", 6 + (drop.x - x0) * self.tile, 40 + (drop.y - y0) * self.tile, self.tile, THEME["gold"], self.glyph_font)
         self.draw_actor(e.spec.player, p.x, p.y, x0, y0, e.spec.player.visual.color)
         target = self.quest_target()
         if target and target[0] == p.map_id:
@@ -253,6 +256,7 @@ class App:
             lines = [p.name + " — " + p.archetype, "", p.background, p.appearance, "", "Motivations: " + "; ".join(p.motivations), "Traits: " + "; ".join(p.personality), ""]
             lines += [f"{e.index[k].name}: {e.stat(e.player, k)}" for k in e.player.stats]
             lines += ["", "ABILITIES"] + [e.index[aid].name + ": " + e.index[aid].description for aid in e.known_abilities()]
+            lines += ["", "PASSIVES"] + [p.name + ": " + p.description for p in e.spec.player.passives]
             lines += ["", "PRACTICE"] + [f"{s.name}: {e.state.skills.get(s.id, 0)}/{s.threshold}" + (" — mastered" if s.id in e.state.mastered_skills else "") for s in e.spec.skills]
             return lines
         if self.tab == "BOOKS":
