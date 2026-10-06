@@ -35,15 +35,16 @@ work just because a smaller slice runs.
 15. [x] README and architecture/migration/originality documentation; PR
     description with before/after, motivation, preserved features, capabilities,
     examples/screenshots, tests, performance, limitations and future work.
-16. [ ] Clean commits/branch and published PR (GitHub authentication currently
-    invalid; prepare everything locally before requesting an external fix).
+16. [ ] Final clean commits/branch and reviewable local PR draft.
+    The user explicitly requested keeping the PR local; publication is no longer
+    a completion gate for this session.
 
 Completion requires evidence for each gate and each numbered section of the
 original request. Offline fixtures do not prove live semantic authorship;
 render smoke tests do not prove a whole campaign is enjoyable. Persist genuine
 limitations and verify the largest possible authorized scope before handoff.
 
-Current evidence: 225 tests passed, including HTTP streaming, server-disconnect
+Current evidence: 231 tests passed, including HTTP streaming, server-disconnect
 and retry checks. The local model returned structured source analysis and a
 world identity, but both contained copied passages and cannot be accepted.
 Fresh-prose guards now run during reading and creative-foundation construction.

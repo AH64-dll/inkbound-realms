@@ -48,7 +48,7 @@ progression and save/resume. Tests also cover ingestion, schema/graph failures,
 recorded structured tool responses, local HTTP adapter mocks, regeneration,
 cross-process determinism, assets and UI rendering.
 
-The current Linux suite passes 225 tests. Overflow finds survive full packs and
+The current Linux suite passes 231 tests. Overflow finds survive full packs and
 save/resume; main-quest items are protected from sale/crafting/consumable use.
 Living escorts, typed passives, authored water movement, summon allegiance and
 canonical package ordering are exercised. Reading and creative-foundation
@@ -67,8 +67,8 @@ licensed adaptation require a declared rights basis. Dialogue/lore must use fres
 prose; provenance stores abstract inspiration. Similarity heuristics plus critique
 catch obvious copying but do not establish legal originality.
 
-This description is a **local PR draft** until live provider verification, final
-review and publication gates are resolved. Recorded fixtures are not advertised
+This description is a **local PR draft**, kept local at the user's request.
+Live provider verification and final review remain required. Recorded fixtures are not advertised
 as live AI-generated worlds. Windows/macOS interactive verification, extended
 human gameplay/creative review and safe ongoing-save migration across regenerated
 revisions remain explicit limits. Broader original-game subsystem ports and richer

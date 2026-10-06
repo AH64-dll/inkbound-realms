@@ -68,7 +68,9 @@ token/cost accounting.
 
 The provider protocol accepts a system instruction, contextual data and tool
 schemas, returning typed tool calls and usage. Native Ollama and compatible
-HTTP servers are adapters; applications may inject other adapters. Retries apply
+HTTP servers and the installed OMP harness are adapters; applications may inject
+other adapters. OMP uses `omp auth-gateway stdio` with its existing login, keeping
+credentials outside the request, cache and package. Retries apply
 to transient transport failure and malformed structured outputs. Optional prose
 streaming is separate from atomic compilation. Cache keys include adapter/model,
 prompt, tool schemas and protocol version. Cache files contain output, not

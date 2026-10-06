@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import subprocess
 import time
 import urllib.error
 import urllib.request
@@ -58,6 +59,16 @@ class ProviderError(RuntimeError):
     pass
 
 
+def decode_response(message, usage):
+    calls = []
+    for call in message.get("tool_calls", []):
+        function = call["function"]; args = function["arguments"]
+        args = json.loads(args) if isinstance(args, str) else args
+        if not isinstance(args, dict): raise ProviderError("Tool arguments must be objects")
+        calls.append(ToolCall(function["name"], args))
+    return Response(calls, message.get("content") or "", usage)
+
+
 class HTTPProvider:
     """Configure any local or remote server exposing one of these two dialects.
 
@@ -109,13 +120,7 @@ class HTTPProvider:
                     if len(raw) > 8 * 1024 * 1024: raise ProviderError("Provider response too large")
                     data = json.loads(raw)
                 message = data.get("message") if self.dialect == "ollama" else data["choices"][0]["message"]
-                calls = []
-                for call in message.get("tool_calls", []):
-                    function = call["function"]; args = function["arguments"]
-                    args = json.loads(args) if isinstance(args, str) else args
-                    if not isinstance(args, dict): raise ProviderError("Tool arguments must be objects")
-                    calls.append(ToolCall(function["name"], args))
-                return Response(calls, message.get("content") or "", self._usage(data))
+                return decode_response(message, self._usage(data))
             except urllib.error.HTTPError as exc:
                 if exc.code not in (429, 500, 502, 503, 504) or attempt == self.retries:
                     raise ProviderError(f"Provider HTTP {exc.code}; verify endpoint/model/authentication") from None
@@ -151,6 +156,48 @@ class HTTPProvider:
                     if content: yield content
         except (urllib.error.URLError, TimeoutError, ValueError) as exc:
             raise ProviderError(f"Provider stream failed: {type(exc).__name__}") from None
+
+
+class OMPProvider:
+    """Use the installed OMP harness and its login without exporting credentials."""
+
+    def __init__(self, model: str, *, executable="omp", timeout=180, retries=2):
+        self.model = model; self.executable = executable
+        self.timeout = timeout; self.retries = retries
+        self.identity = f"omp:{model}"
+        self.accounting = HTTPProvider("http://localhost", model, dialect="compatible")
+
+    def complete(self, system, prompt, tools):
+        request = {"id": "inkbound", "path": "/v1/chat/completions", "body": {
+            "model": self.model,
+            "messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+            "tools": [tool.wire() for tool in tools], "tool_choice": "required",
+            "temperature": 0.35, "reasoning_effort": "medium", "stream": False}}
+        for attempt in range(self.retries + 1):
+            try:
+                process = subprocess.run([self.executable, "auth-gateway", "stdio"],
+                                         input=canonical(request).decode() + "\n", text=True,
+                                         capture_output=True, timeout=self.timeout)
+                if process.returncode:
+                    raise ProviderError("OMP gateway failed; verify the installed CLI and OMP authentication")
+                if len(process.stdout.encode()) > 8 * 1024 * 1024:
+                    raise ProviderError("OMP response too large")
+                envelopes = [json.loads(line) for line in process.stdout.splitlines() if line.strip()]
+                envelope = next(e for e in envelopes if e.get("id") == "inkbound")
+                status = envelope["status"]
+                if status != 200:
+                    if status in (429, 500, 502, 503, 504) and attempt < self.retries:
+                        time.sleep(min(2**attempt, 4)); continue
+                    raise ProviderError(f"OMP gateway HTTP {status}; verify model and OMP authentication")
+                data = envelope["body"]
+                return decode_response(data["choices"][0]["message"], self.accounting._usage(data))
+            except subprocess.TimeoutExpired:
+                if attempt == self.retries: raise ProviderError("OMP request timed out") from None
+            except OSError:
+                raise ProviderError("OMP CLI is unavailable; install and authenticate OMP") from None
+            except (KeyError, TypeError, ValueError, IndexError, AttributeError, StopIteration) as exc:
+                raise ProviderError(f"Malformed OMP response: {type(exc).__name__}") from None
+            time.sleep(min(2**attempt, 4))
 
 
 class CachedProvider:

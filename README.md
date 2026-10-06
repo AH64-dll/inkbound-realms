@@ -77,6 +77,10 @@ inkbound compile /path/to/book.txt realms/another-realm \
   --id realm.another --dialect compatible \
   --endpoint http://127.0.0.1:8080/v1 --model your-model
 
+# Installed OMP harness, using its existing authenticated provider:
+inkbound compile /path/to/book.txt realms/swe-realm \
+  --id realm.swe --dialect omp --model devin/swe-2
+
 inkbound play realms/my-realm
 ```
 
@@ -86,6 +90,11 @@ ending, enter hierarchical semantic synthesis. Authoring performs multiple
 constrained calls and can take substantial time. `.cache/authoring/` stores
 content-addressed outputs; `--max-calls` bounds operations. A model failure or
 failed validation leaves no playable incomplete package.
+
+The OMP adapter uses `omp auth-gateway stdio`; it needs the installed OMP CLI and
+an authenticated model provider, without a local model server or exported token.
+Endpoint arguments apply to the HTTP adapters. OMP authoring uses atomic tool
+responses; gameplay never invokes OMP or any model.
 
 `original_inspiration` is the default: new identities, histories, motives,
 relationships, geography and expression, rather than mutated names. For material

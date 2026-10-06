@@ -38,8 +38,8 @@ def main():
     regenerate.add_argument("--ids", nargs="+"); regenerate.add_argument("--instruction", required=True)
     regenerate.add_argument("--book", help="Original source for originality checks after regeneration")
     for command in (compile_command, regenerate):
-        command.add_argument("--endpoint", required=True); command.add_argument("--model", required=True)
-        command.add_argument("--dialect", choices=["ollama", "compatible"], default="ollama")
+        command.add_argument("--endpoint"); command.add_argument("--model", required=True)
+        command.add_argument("--dialect", choices=["ollama", "compatible", "omp"], default="ollama")
         command.add_argument("--cache", default=".cache/authoring"); command.add_argument("--max-calls", type=int, default=1000)
         command.add_argument("--timeout", type=float, default=180, help="Seconds per model request; increase for CPU inference")
     args = parser.parse_args()
@@ -51,9 +51,14 @@ def main():
         if args.command in ("compile", "regenerate"):
             from inkbound.authoring.harness import Harness
             from inkbound.authoring.ingest import ingest
-            from inkbound.authoring.providers import CachedProvider, HTTPProvider
+            from inkbound.authoring.providers import CachedProvider, HTTPProvider, OMPProvider
             from inkbound.realm.models import AdaptationPolicy
-            provider = CachedProvider(HTTPProvider(args.endpoint, args.model, dialect=args.dialect, timeout=args.timeout), args.cache)
+            if args.dialect == "omp":
+                backend = OMPProvider(args.model, timeout=args.timeout)
+            else:
+                if not args.endpoint: raise ValueError("--endpoint is required for Ollama and compatible HTTP providers")
+                backend = HTTPProvider(args.endpoint, args.model, dialect=args.dialect, timeout=args.timeout)
+            provider = CachedProvider(backend, args.cache)
             harness = Harness(provider, max_calls=args.max_calls, notify=print)
             if args.command == "compile":
                 policy = AdaptationPolicy(mode=args.adaptation, rights_basis=args.rights_basis, allow_source_names=args.allow_source_names)

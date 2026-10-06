@@ -9,7 +9,7 @@ import pytest
 from inkbound.authoring.harness import Harness, TOOL_MODELS
 from inkbound.authoring.ingest import ingest
 from inkbound.authoring.originality import originality_issues, names_in_text, transformation_count
-from inkbound.authoring.providers import CachedProvider, HTTPProvider, ProviderError, Response, Tool, ToolCall, Usage
+from inkbound.authoring.providers import CachedProvider, HTTPProvider, OMPProvider, ProviderError, Response, Tool, ToolCall, Usage
 from inkbound.realm.models import AdaptationPolicy, BookInterpretation, RealmSpec
 from inkbound.realm.validation import InvalidRealm
 
@@ -327,6 +327,55 @@ def test_structured_output_retry_and_budget(spec):
     assert h.calls == 3
     with pytest.raises(ProviderError, match="budget"):
         Harness(Broken(), max_calls=0).interpret(ingest("fixtures/books/fantasy.txt"))
+
+
+def test_omp_gateway_uses_structured_tools_and_existing_auth_without_exporting_keys(monkeypatch):
+    from types import SimpleNamespace
+    requests = []
+    monkeypatch.setenv("INKBOUND_API_KEY", "private-key-sentinel")
+    def run(command, **kwargs):
+        requests.append((command, kwargs))
+        envelope = {"id": "inkbound", "status": 200, "body": {"choices": [{"message": {"tool_calls": [{"function": {"name": "define_economy", "arguments": '{"currency_name":"credits"}'}}]}}], "usage": {"prompt_tokens": 23, "completion_tokens": 7}}}
+        return SimpleNamespace(returncode=0, stdout=json.dumps({"ready": True}) + "\n" + json.dumps(envelope) + "\n", stderr="")
+    monkeypatch.setattr("inkbound.authoring.providers.subprocess.run", run)
+    response = OMPProvider("devin/swe-2").complete("system", "book data", [Tool("define_economy", "economy", {})])
+    assert response.calls[0].arguments == {"currency_name": "credits"}
+    assert response.usage.input_tokens == 23 and response.usage.output_tokens == 7
+    command, kwargs = requests[0]
+    assert command == ["omp", "auth-gateway", "stdio"]
+    body = json.loads(kwargs["input"])["body"]
+    assert body["model"] == "devin/swe-2" and body["tool_choice"] == "required"
+    assert body["tools"][0]["function"]["name"] == "define_economy"
+    assert "private-key-sentinel" not in kwargs["input"]
+
+
+@pytest.mark.parametrize("failure", ["authentication", "exit", "malformed", "timeout"])
+def test_omp_failures_are_bounded_and_do_not_expose_diagnostics(monkeypatch, failure):
+    import subprocess
+    from types import SimpleNamespace
+    def run(command, **kwargs):
+        if failure == "timeout": raise subprocess.TimeoutExpired(command, 1)
+        return SimpleNamespace(returncode=1 if failure == "exit" else 0,
+                               stdout="not json" if failure == "malformed" else json.dumps({"id": "inkbound", "status": 401}),
+                               stderr="private-key-sentinel")
+    monkeypatch.setattr("inkbound.authoring.providers.subprocess.run", run)
+    with pytest.raises(ProviderError) as error:
+        OMPProvider("devin/swe-2", retries=0).complete("system", "prompt", [])
+    assert "private-key-sentinel" not in str(error.value)
+
+
+def test_omp_retries_transient_gateway_status(monkeypatch):
+    from types import SimpleNamespace
+    attempts = []
+    def run(command, **kwargs):
+        attempts.append(1)
+        envelope = {"id": "inkbound", "status": 503 if len(attempts) == 1 else 200,
+                    "body": {"choices": [{"message": {"content": "ready"}}]}}
+        return SimpleNamespace(returncode=0, stdout=json.dumps(envelope), stderr="")
+    monkeypatch.setattr("inkbound.authoring.providers.subprocess.run", run)
+    monkeypatch.setattr("inkbound.authoring.providers.time.sleep", lambda seconds: None)
+    assert OMPProvider("devin/swe-2").complete("system", "prompt", []).text == "ready"
+    assert len(attempts) == 2
 
 
 def test_cache_does_not_store_prompts_and_tracks_usage(spec, tmp_path):

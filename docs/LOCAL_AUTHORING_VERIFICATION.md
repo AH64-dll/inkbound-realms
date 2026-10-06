@@ -73,6 +73,27 @@ inkbound compile fixtures/books/science_fiction.txt realms/live-relay \
 
 A completed experiment must validate the resulting package, inspect its creative
 quality, play its linked objectives/combat/progression and verify save/resume.
-Structured transport alone is insufficient evidence. The 225 passing automated
+Structured transport alone is insufficient evidence. The 231 passing automated
 tests, fixture campaigns, screenshots and wheel-install smoke test establish
 their own narrower scopes.
+
+## Selected OMP backend
+
+The user selected SWE-2 through the OMP harness on this device and requested
+keeping the PR local. The temporary Qwen compiler and model server were stopped.
+OMP v18.6.1 successfully responded as provider `devin`, model `swe-2`; a subsequent
+`omp auth-gateway stdio` probe returned HTTP 200 with a real structured tool call.
+No auth broker or exported credential was needed. The adapter forwards atomic
+OpenAI-shaped tool requests through OMP's own authentication, retaining bounded
+retries and timeouts, schema validation, usage accounting and output-only caches.
+
+A fresh whole pipeline, without reusing Qwen responses, is running with:
+
+```bash
+inkbound compile fixtures/books/science_fiction.txt realms/live-swe2 \
+  --id realm.live-swe2 --dialect omp --model devin/swe-2 \
+  --max-calls 120 --timeout 300
+```
+
+Connectivity and accepted intermediate content are still distinct from the
+required final package validation, creative inspection and actual campaign.
