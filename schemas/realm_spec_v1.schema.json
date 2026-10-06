@@ -1,0 +1,3218 @@
+{
+  "$defs": {
+    "Ability": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "target": {
+          "default": "enemy",
+          "enum": [
+            "enemy",
+            "self",
+            "all_enemies",
+            "ally"
+          ],
+          "title": "Target",
+          "type": "string"
+        },
+        "range": {
+          "default": 1,
+          "maximum": 12,
+          "minimum": 0,
+          "title": "Range",
+          "type": "integer"
+        },
+        "radius": {
+          "default": 0,
+          "maximum": 6,
+          "minimum": 0,
+          "title": "Radius",
+          "type": "integer"
+        },
+        "cost": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "maximum": 1000000,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "title": "Cost",
+          "type": "object"
+        },
+        "cooldown": {
+          "default": 0,
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Cooldown",
+          "type": "integer"
+        },
+        "accuracy": {
+          "default": 100,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Accuracy",
+          "type": "integer"
+        },
+        "power_scale": {
+          "default": 0,
+          "maximum": 5,
+          "minimum": 0,
+          "title": "Power Scale",
+          "type": "integer"
+        },
+        "effects": {
+          "items": {
+            "$ref": "#/$defs/Effect"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Effects",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "effects"
+      ],
+      "title": "Ability",
+      "type": "object"
+    },
+    "Action": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "grant_item",
+            "gold",
+            "xp",
+            "standing",
+            "flag",
+            "unlock",
+            "heal",
+            "spawn",
+            "start_quest"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target"
+        },
+        "amount": {
+          "default": 1,
+          "maximum": 100000,
+          "minimum": -100000,
+          "title": "Amount",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "Action",
+      "type": "object"
+    },
+    "AdaptationPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "default": "original_inspiration",
+          "enum": [
+            "original_inspiration",
+            "public_domain_adaptation",
+            "licensed_adaptation"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "rights_basis": {
+          "default": "",
+          "maxLength": 1000,
+          "title": "Rights Basis",
+          "type": "string"
+        },
+        "allow_source_names": {
+          "default": false,
+          "title": "Allow Source Names",
+          "type": "boolean"
+        }
+      },
+      "title": "AdaptationPolicy",
+      "type": "object"
+    },
+    "Asset": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "kind": {
+          "enum": [
+            "glyph",
+            "sprite",
+            "portrait",
+            "tile",
+            "icon",
+            "background",
+            "music",
+            "ambient",
+            "combat_sound",
+            "ui_theme",
+            "font",
+            "animation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "provider": {
+          "default": "fallback",
+          "enum": [
+            "existing",
+            "procedural",
+            "local",
+            "remote",
+            "fallback"
+          ],
+          "title": "Provider",
+          "type": "string"
+        },
+        "path": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Path"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sha256"
+        },
+        "fallback": {
+          "$ref": "#/$defs/Visual"
+        },
+        "prompt": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Prompt",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "kind"
+      ],
+      "title": "Asset",
+      "type": "object"
+    },
+    "BookInterpretation": {
+      "additionalProperties": false,
+      "properties": {
+        "summary": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Summary",
+          "type": "string"
+        },
+        "genre": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Genre",
+          "type": "string"
+        },
+        "tone": {
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 12,
+          "minItems": 1,
+          "title": "Tone",
+          "type": "array"
+        },
+        "themes": {
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Themes",
+          "type": "array"
+        },
+        "era": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Era",
+          "type": "string"
+        },
+        "technology": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Technology",
+          "type": "string"
+        },
+        "supernatural_rules": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Supernatural Rules",
+          "type": "string"
+        },
+        "archetypes": {
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Archetypes",
+          "type": "array"
+        },
+        "factions_and_cultures": {
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Factions And Cultures",
+          "type": "array"
+        },
+        "social_structures": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Social Structures",
+          "type": "string"
+        },
+        "geography": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Geography",
+          "type": "string"
+        },
+        "conflicts": {
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Conflicts",
+          "type": "array"
+        },
+        "relationships": {
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Relationships",
+          "type": "array"
+        },
+        "narrative_structure": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Narrative Structure",
+          "type": "string"
+        },
+        "danger": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Danger",
+          "type": "string"
+        },
+        "morality": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Morality",
+          "type": "string"
+        },
+        "atmosphere": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Atmosphere",
+          "type": "string"
+        },
+        "economy": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Economy",
+          "type": "string"
+        },
+        "combat_style": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Combat Style",
+          "type": "string"
+        },
+        "important_objects": {
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Important Objects",
+          "type": "array"
+        },
+        "progression_opportunities": {
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Progression Opportunities",
+          "type": "array"
+        }
+      },
+      "required": [
+        "summary",
+        "genre",
+        "tone",
+        "themes",
+        "era",
+        "technology",
+        "supernatural_rules",
+        "archetypes",
+        "factions_and_cultures",
+        "social_structures",
+        "geography",
+        "conflicts",
+        "relationships",
+        "narrative_structure",
+        "danger",
+        "morality",
+        "atmosphere",
+        "economy",
+        "combat_style",
+        "important_objects",
+        "progression_opportunities"
+      ],
+      "title": "BookInterpretation",
+      "type": "object"
+    },
+    "ClassDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "ability_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "title": "Ability Ids",
+          "type": "array"
+        },
+        "stat_mods": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "type": "integer"
+            }
+          },
+          "title": "Stat Mods",
+          "type": "object"
+        },
+        "progression_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Progression Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "progression_id"
+      ],
+      "title": "ClassDefinition",
+      "type": "object"
+    },
+    "Condition": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "quest_done",
+            "quest_active",
+            "item",
+            "standing",
+            "flag",
+            "level",
+            "visited",
+            "kills",
+            "turn"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target"
+        },
+        "amount": {
+          "default": 1,
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Amount",
+          "type": "integer"
+        },
+        "negate": {
+          "default": false,
+          "title": "Negate",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "Condition",
+      "type": "object"
+    },
+    "CreativeDirection": {
+      "additionalProperties": false,
+      "properties": {
+        "interpretation": {
+          "$ref": "#/$defs/BookInterpretation"
+        },
+        "world_bible": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "World Bible",
+          "type": "string"
+        },
+        "gameplay_identity": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Gameplay Identity",
+          "type": "string"
+        },
+        "originality_strategy": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Originality Strategy",
+          "type": "string"
+        },
+        "main_narrative": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Main Narrative",
+          "type": "string"
+        },
+        "side_narratives": {
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Side Narratives",
+          "type": "array"
+        },
+        "quality_criteria": {
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 3,
+          "title": "Quality Criteria",
+          "type": "array"
+        }
+      },
+      "required": [
+        "interpretation",
+        "world_bible",
+        "gameplay_identity",
+        "originality_strategy",
+        "main_narrative",
+        "side_narratives",
+        "quality_criteria"
+      ],
+      "title": "CreativeDirection",
+      "type": "object"
+    },
+    "DamageType": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance"
+      ],
+      "title": "DamageType",
+      "type": "object"
+    },
+    "Dialogue": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "style": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Style",
+          "type": "string"
+        },
+        "start_node_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Start Node Id",
+          "type": "string"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/DialogueNode"
+          },
+          "maxItems": 40,
+          "minItems": 1,
+          "title": "Nodes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "style",
+        "start_node_id",
+        "nodes"
+      ],
+      "title": "Dialogue",
+      "type": "object"
+    },
+    "DialogueChoice": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "next_node_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next Node Id"
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/Condition"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/$defs/Action"
+          },
+          "title": "Actions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "DialogueChoice",
+      "type": "object"
+    },
+    "DialogueNode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "choices": {
+          "items": {
+            "$ref": "#/$defs/DialogueChoice"
+          },
+          "maxItems": 8,
+          "title": "Choices",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "DialogueNode",
+      "type": "object"
+    },
+    "Economy": {
+      "additionalProperties": false,
+      "properties": {
+        "currency_name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Currency Name",
+          "type": "string"
+        },
+        "starting_gold": {
+          "default": 20,
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Starting Gold",
+          "type": "integer"
+        },
+        "rest_price": {
+          "default": 3,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Rest Price",
+          "type": "integer"
+        },
+        "heal_price": {
+          "default": 5,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Heal Price",
+          "type": "integer"
+        },
+        "caravan_price": {
+          "default": 8,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Caravan Price",
+          "type": "integer"
+        },
+        "sell_percent": {
+          "default": 50,
+          "maximum": 90,
+          "minimum": 1,
+          "title": "Sell Percent",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "currency_name"
+      ],
+      "title": "Economy",
+      "type": "object"
+    },
+    "Effect": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "damage",
+            "heal",
+            "shield",
+            "status",
+            "cleanse",
+            "push",
+            "teleport",
+            "summon",
+            "reveal",
+            "negotiate"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "amount": {
+          "default": 0,
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Amount",
+          "type": "integer"
+        },
+        "damage_type": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Damage Type"
+        },
+        "resource_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resource Id"
+        },
+        "status_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status Id"
+        },
+        "enemy_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Enemy Id"
+        },
+        "duration": {
+          "default": 1,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Duration",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "Effect",
+      "type": "object"
+    },
+    "EncounterTable": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "region_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Region Id",
+          "type": "string"
+        },
+        "location_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Location Id"
+        },
+        "enemy_counts": {
+          "minProperties": 1,
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "title": "Enemy Counts",
+          "type": "object"
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/Condition"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "respawn_turns": {
+          "default": 0,
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Respawn Turns",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "region_id",
+        "enemy_counts"
+      ],
+      "title": "EncounterTable",
+      "type": "object"
+    },
+    "EnemyArchetype": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "family_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Family Id",
+          "type": "string"
+        },
+        "role": {
+          "default": "enemy",
+          "enum": [
+            "enemy",
+            "boss",
+            "creature"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "behavior": {
+          "default": "melee",
+          "enum": [
+            "melee",
+            "ranged",
+            "support",
+            "passive"
+          ],
+          "title": "Behavior",
+          "type": "string"
+        },
+        "stats": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "maximum": 1000000,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "title": "Stats",
+          "type": "object"
+        },
+        "resources": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "title": "Resources",
+          "type": "object"
+        },
+        "ability_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Ability Ids",
+          "type": "array"
+        },
+        "resistances": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "type": "integer"
+            }
+          },
+          "title": "Resistances",
+          "type": "object"
+        },
+        "vulnerabilities": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "type": "integer"
+            }
+          },
+          "title": "Vulnerabilities",
+          "type": "object"
+        },
+        "loot": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "maximum": 1000000,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "title": "Loot",
+          "type": "object"
+        },
+        "xp": {
+          "default": 20,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Xp",
+          "type": "integer"
+        },
+        "gold": {
+          "default": 5,
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Gold",
+          "type": "integer"
+        },
+        "faction_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Faction Id"
+        },
+        "negotiation_difficulty": {
+          "default": 10,
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Negotiation Difficulty",
+          "type": "integer"
+        },
+        "phase_ability_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "title": "Phase Ability Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "family_id",
+        "stats",
+        "resources",
+        "ability_ids"
+      ],
+      "title": "EnemyArchetype",
+      "type": "object"
+    },
+    "EquipmentSlot": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance"
+      ],
+      "title": "EquipmentSlot",
+      "type": "object"
+    },
+    "Faction": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "ideology": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Ideology",
+          "type": "string"
+        },
+        "culture": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Culture",
+          "type": "string"
+        },
+        "goals": {
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Goals",
+          "type": "array"
+        },
+        "relationships": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "type": "integer"
+            }
+          },
+          "title": "Relationships",
+          "type": "object"
+        },
+        "home_location_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Home Location Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "ideology",
+        "culture",
+        "goals",
+        "home_location_id"
+      ],
+      "title": "Faction",
+      "type": "object"
+    },
+    "HistoryEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "year": {
+          "title": "Year",
+          "type": "integer"
+        },
+        "event": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Event",
+          "type": "string"
+        },
+        "entity_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "title": "Entity Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "year",
+        "event"
+      ],
+      "title": "HistoryEntry",
+      "type": "object"
+    },
+    "Item": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "kind": {
+          "enum": [
+            "equipment",
+            "consumable",
+            "material",
+            "artifact"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "slot_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Slot Id"
+        },
+        "price": {
+          "default": 1,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Price",
+          "type": "integer"
+        },
+        "stat_mods": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "type": "integer"
+            }
+          },
+          "title": "Stat Mods",
+          "type": "object"
+        },
+        "resistances": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "type": "integer"
+            }
+          },
+          "title": "Resistances",
+          "type": "object"
+        },
+        "ability_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "title": "Ability Ids",
+          "type": "array"
+        },
+        "effects": {
+          "items": {
+            "$ref": "#/$defs/Effect"
+          },
+          "title": "Effects",
+          "type": "array"
+        },
+        "tags": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "kind"
+      ],
+      "title": "Item",
+      "type": "object"
+    },
+    "Location": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "region_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Region Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "settlement",
+            "dungeon",
+            "ruin",
+            "shrine",
+            "camp",
+            "farm",
+            "tower"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "x": {
+          "maximum": 298,
+          "minimum": 1,
+          "title": "X",
+          "type": "integer"
+        },
+        "y": {
+          "maximum": 168,
+          "minimum": 1,
+          "title": "Y",
+          "type": "integer"
+        },
+        "faction_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Faction Id"
+        },
+        "depth": {
+          "default": 1,
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Depth",
+          "type": "integer"
+        },
+        "theme": {
+          "default": "",
+          "enum": [
+            "",
+            "sunken",
+            "overgrown",
+            "scorched"
+          ],
+          "title": "Theme",
+          "type": "string"
+        },
+        "locked_by": {
+          "items": {
+            "$ref": "#/$defs/Condition"
+          },
+          "title": "Locked By",
+          "type": "array"
+        },
+        "market_items": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "title": "Market Items",
+          "type": "object"
+        },
+        "entry_actions": {
+          "items": {
+            "$ref": "#/$defs/Action"
+          },
+          "title": "Entry Actions",
+          "type": "array"
+        },
+        "lore": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Lore",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "region_id",
+        "kind",
+        "x",
+        "y",
+        "lore"
+      ],
+      "title": "Location",
+      "type": "object"
+    },
+    "Metadata": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "seed": {
+          "maximum": 9223372036854775807,
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "source_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Digest",
+          "type": "string"
+        },
+        "source_title": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Source Title",
+          "type": "string"
+        },
+        "authoring_provider": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Authoring Provider",
+          "type": "string"
+        },
+        "adaptation": {
+          "$ref": "#/$defs/AdaptationPolicy"
+        },
+        "revision": {
+          "default": 1,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "seed",
+        "source_digest",
+        "source_title",
+        "authoring_provider"
+      ],
+      "title": "Metadata",
+      "type": "object"
+    },
+    "NPC": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "role": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Role",
+          "type": "string"
+        },
+        "background": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Background",
+          "type": "string"
+        },
+        "motivation": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Motivation",
+          "type": "string"
+        },
+        "personality": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Personality",
+          "type": "string"
+        },
+        "location_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Location Id",
+          "type": "string"
+        },
+        "faction_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Faction Id"
+        },
+        "dialogue_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Dialogue Id",
+          "type": "string"
+        },
+        "relationships": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "maxLength": 4000,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "title": "Relationships",
+          "type": "object"
+        },
+        "services": {
+          "items": {
+            "enum": [
+              "shop",
+              "heal",
+              "rumor",
+              "history",
+              "scout"
+            ],
+            "type": "string"
+          },
+          "title": "Services",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "role",
+        "background",
+        "motivation",
+        "personality",
+        "location_id",
+        "dialogue_id"
+      ],
+      "title": "NPC",
+      "type": "object"
+    },
+    "Objective": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "visit",
+            "kill",
+            "talk",
+            "collect",
+            "craft",
+            "pay",
+            "escort",
+            "choice"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "target_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Target Id",
+          "type": "string"
+        },
+        "count": {
+          "default": 1,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "destination_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Destination Id"
+        },
+        "consume": {
+          "default": false,
+          "title": "Consume",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "target_id"
+      ],
+      "title": "Objective",
+      "type": "object"
+    },
+    "PlayerDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "archetype": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Archetype",
+          "type": "string"
+        },
+        "background": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Background",
+          "type": "string"
+        },
+        "appearance": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Appearance",
+          "type": "string"
+        },
+        "motivations": {
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Motivations",
+          "type": "array"
+        },
+        "personality": {
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Personality",
+          "type": "array"
+        },
+        "stats": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "maximum": 1000000,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "title": "Stats",
+          "type": "object"
+        },
+        "resources": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "title": "Resources",
+          "type": "object"
+        },
+        "movement": {
+          "default": "walk",
+          "enum": [
+            "walk",
+            "sail",
+            "hover"
+          ],
+          "title": "Movement",
+          "type": "string"
+        },
+        "equipment_slots": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "title": "Equipment Slots",
+          "type": "array"
+        },
+        "ability_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Ability Ids",
+          "type": "array"
+        },
+        "interaction_ability_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "title": "Interaction Ability Ids",
+          "type": "array"
+        },
+        "passive_traits": {
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Passive Traits",
+          "type": "array"
+        },
+        "special_mechanics": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "title": "Special Mechanics",
+          "type": "array"
+        },
+        "starting_items": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "title": "Starting Items",
+          "type": "object"
+        },
+        "vulnerabilities": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "type": "integer"
+            }
+          },
+          "title": "Vulnerabilities",
+          "type": "object"
+        },
+        "resistances": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "type": "integer"
+            }
+          },
+          "title": "Resistances",
+          "type": "object"
+        },
+        "progression_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Progression Id",
+          "type": "string"
+        },
+        "starting_location_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Starting Location Id",
+          "type": "string"
+        },
+        "species_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Species Id"
+        },
+        "class_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Class Id"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "archetype",
+        "background",
+        "appearance",
+        "motivations",
+        "personality",
+        "stats",
+        "resources",
+        "equipment_slots",
+        "ability_ids",
+        "progression_id",
+        "starting_location_id"
+      ],
+      "title": "PlayerDefinition",
+      "type": "object"
+    },
+    "Progression": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "xp_per_level": {
+          "default": 100,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Xp Per Level",
+          "type": "integer"
+        },
+        "stat_growth": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "maximum": 1000000,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "title": "Stat Growth",
+          "type": "object"
+        },
+        "resource_growth": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "maximum": 1000000,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "title": "Resource Growth",
+          "type": "object"
+        },
+        "unlocks": {
+          "additionalProperties": {
+            "items": {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Unlocks",
+          "type": "object"
+        },
+        "skill_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "title": "Skill Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance"
+      ],
+      "title": "Progression",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "concepts": {
+          "items": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Concepts",
+          "type": "array"
+        },
+        "rationale": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        },
+        "source_chunk_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Source Chunk Ids",
+          "type": "array"
+        },
+        "transformations": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Transformations",
+          "type": "object"
+        }
+      },
+      "required": [
+        "concepts",
+        "rationale"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "Quest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "arc_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Arc Id",
+          "type": "string"
+        },
+        "giver_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Giver Id",
+          "type": "string"
+        },
+        "prerequisites": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "title": "Prerequisites",
+          "type": "array"
+        },
+        "objectives": {
+          "items": {
+            "$ref": "#/$defs/Objective"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Objectives",
+          "type": "array"
+        },
+        "reward_actions": {
+          "items": {
+            "$ref": "#/$defs/Action"
+          },
+          "maxItems": 12,
+          "minItems": 1,
+          "title": "Reward Actions",
+          "type": "array"
+        },
+        "main": {
+          "default": false,
+          "title": "Main",
+          "type": "boolean"
+        },
+        "discovered": {
+          "default": false,
+          "title": "Discovered",
+          "type": "boolean"
+        },
+        "deadline_turns": {
+          "anyOf": [
+            {
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deadline Turns"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "arc_id",
+        "giver_id",
+        "objectives",
+        "reward_actions"
+      ],
+      "title": "Quest",
+      "type": "object"
+    },
+    "Recipe": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "ingredients": {
+          "minProperties": 1,
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "title": "Ingredients",
+          "type": "object"
+        },
+        "outputs": {
+          "minProperties": 1,
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "title": "Outputs",
+          "type": "object"
+        },
+        "gold_cost": {
+          "default": 0,
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Gold Cost",
+          "type": "integer"
+        },
+        "required_skill_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Required Skill Id"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "ingredients",
+        "outputs"
+      ],
+      "title": "Recipe",
+      "type": "object"
+    },
+    "Region": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "biome": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Biome",
+          "type": "string"
+        },
+        "atmosphere": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Atmosphere",
+          "type": "string"
+        },
+        "generator": {
+          "default": "wilderness",
+          "enum": [
+            "wilderness",
+            "nautical",
+            "station"
+          ],
+          "title": "Generator",
+          "type": "string"
+        },
+        "width": {
+          "default": 64,
+          "maximum": 300,
+          "minimum": 32,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "default": 40,
+          "maximum": 170,
+          "minimum": 25,
+          "title": "Height",
+          "type": "integer"
+        },
+        "danger": {
+          "default": 1,
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Danger",
+          "type": "integer"
+        },
+        "faction_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "title": "Faction Ids",
+          "type": "array"
+        },
+        "neighbor_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "title": "Neighbor Ids",
+          "type": "array"
+        },
+        "frontier": {
+          "default": true,
+          "title": "Frontier",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "biome",
+        "atmosphere"
+      ],
+      "title": "Region",
+      "type": "object"
+    },
+    "Resource": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "role": {
+          "enum": [
+            "health",
+            "energy",
+            "ammo",
+            "resolve",
+            "other"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "maximum": {
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Maximum",
+          "type": "integer"
+        },
+        "regen": {
+          "default": 0,
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Regen",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "role",
+        "maximum"
+      ],
+      "title": "Resource",
+      "type": "object"
+    },
+    "Skill": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "training_action": {
+          "enum": [
+            "combat",
+            "talk",
+            "explore",
+            "craft",
+            "rest"
+          ],
+          "title": "Training Action",
+          "type": "string"
+        },
+        "threshold": {
+          "default": 5,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Threshold",
+          "type": "integer"
+        },
+        "ability_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "title": "Ability Ids",
+          "type": "array"
+        },
+        "stat_mods": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "type": "integer"
+            }
+          },
+          "title": "Stat Mods",
+          "type": "object"
+        },
+        "prerequisites": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "title": "Prerequisites",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "training_action"
+      ],
+      "title": "Skill",
+      "type": "object"
+    },
+    "Species": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "culture": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Culture",
+          "type": "string"
+        },
+        "stat_mods": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "type": "integer"
+            }
+          },
+          "title": "Stat Mods",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "culture"
+      ],
+      "title": "Species",
+      "type": "object"
+    },
+    "Stat": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "role": {
+          "enum": [
+            "power",
+            "armor",
+            "speed",
+            "insight",
+            "influence",
+            "luck",
+            "other"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "minimum": {
+          "default": 0,
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Minimum",
+          "type": "integer"
+        },
+        "maximum": {
+          "default": 10000,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Maximum",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "role"
+      ],
+      "title": "Stat",
+      "type": "object"
+    },
+    "StatusEffect": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "tick_damage": {
+          "default": 0,
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Tick Damage",
+          "type": "integer"
+        },
+        "damage_type": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Damage Type"
+        },
+        "stat_mods": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "type": "integer"
+            }
+          },
+          "title": "Stat Mods",
+          "type": "object"
+        },
+        "skip_turn": {
+          "default": false,
+          "title": "Skip Turn",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance"
+      ],
+      "title": "StatusEffect",
+      "type": "object"
+    },
+    "Visual": {
+      "additionalProperties": false,
+      "properties": {
+        "glyph": {
+          "default": "?",
+          "maxLength": 1,
+          "minLength": 1,
+          "title": "Glyph",
+          "type": "string"
+        },
+        "color": {
+          "default": "#c8ccda",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "title": "Color",
+          "type": "string"
+        },
+        "asset_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Asset Id"
+        },
+        "animation_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "title": "Animation Ids",
+          "type": "array"
+        }
+      },
+      "title": "Visual",
+      "type": "object"
+    },
+    "WorldEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "visual": {
+          "$ref": "#/$defs/Visual"
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/Condition"
+          },
+          "minItems": 1,
+          "title": "Conditions",
+          "type": "array"
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/$defs/Action"
+          },
+          "minItems": 1,
+          "title": "Actions",
+          "type": "array"
+        },
+        "once": {
+          "default": true,
+          "title": "Once",
+          "type": "boolean"
+        },
+        "cooldown_turns": {
+          "default": 20,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Cooldown Turns",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "provenance",
+        "conditions",
+        "actions"
+      ],
+      "title": "WorldEvent",
+      "type": "object"
+    },
+    "WorldRules": {
+      "additionalProperties": false,
+      "properties": {
+        "health_resource_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Health Resource Id",
+          "type": "string"
+        },
+        "power_stat_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Power Stat Id",
+          "type": "string"
+        },
+        "armor_stat_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Armor Stat Id",
+          "type": "string"
+        },
+        "speed_stat_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Speed Stat Id",
+          "type": "string"
+        },
+        "influence_stat_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Influence Stat Id",
+          "type": "string"
+        },
+        "default_damage_type_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Default Damage Type Id",
+          "type": "string"
+        },
+        "default_ability_id": {
+          "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+          "title": "Default Ability Id",
+          "type": "string"
+        },
+        "turns_per_day": {
+          "default": 144,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Turns Per Day",
+          "type": "integer"
+        },
+        "death_gold_percent": {
+          "default": 50,
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Death Gold Percent",
+          "type": "integer"
+        },
+        "inventory_capacity": {
+          "default": 80,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Inventory Capacity",
+          "type": "integer"
+        },
+        "supported_mechanics": {
+          "items": {
+            "enum": [
+              "guard",
+              "quick",
+              "heavy",
+              "ranged",
+              "crafting",
+              "companions",
+              "factions",
+              "frontier",
+              "status",
+              "negotiation"
+            ],
+            "type": "string"
+          },
+          "title": "Supported Mechanics",
+          "type": "array"
+        }
+      },
+      "required": [
+        "health_resource_id",
+        "power_stat_id",
+        "armor_stat_id",
+        "speed_stat_id",
+        "influence_stat_id",
+        "default_damage_type_id",
+        "default_ability_id"
+      ],
+      "title": "WorldRules",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "realm_spec_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Realm Spec Version",
+      "type": "integer"
+    },
+    "metadata": {
+      "$ref": "#/$defs/Metadata"
+    },
+    "creative_direction": {
+      "$ref": "#/$defs/CreativeDirection"
+    },
+    "visual_style": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Visual Style",
+      "type": "string"
+    },
+    "audio_direction": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Audio Direction",
+      "type": "string"
+    },
+    "world_rules": {
+      "$ref": "#/$defs/WorldRules"
+    },
+    "player": {
+      "$ref": "#/$defs/PlayerDefinition"
+    },
+    "stats": {
+      "items": {
+        "$ref": "#/$defs/Stat"
+      },
+      "maxItems": 32,
+      "minItems": 1,
+      "title": "Stats",
+      "type": "array"
+    },
+    "resources": {
+      "items": {
+        "$ref": "#/$defs/Resource"
+      },
+      "maxItems": 12,
+      "minItems": 1,
+      "title": "Resources",
+      "type": "array"
+    },
+    "damage_types": {
+      "items": {
+        "$ref": "#/$defs/DamageType"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "title": "Damage Types",
+      "type": "array"
+    },
+    "equipment_slots": {
+      "items": {
+        "$ref": "#/$defs/EquipmentSlot"
+      },
+      "maxItems": 16,
+      "title": "Equipment Slots",
+      "type": "array"
+    },
+    "abilities": {
+      "items": {
+        "$ref": "#/$defs/Ability"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Abilities",
+      "type": "array"
+    },
+    "status_effects": {
+      "items": {
+        "$ref": "#/$defs/StatusEffect"
+      },
+      "title": "Status Effects",
+      "type": "array"
+    },
+    "skills": {
+      "items": {
+        "$ref": "#/$defs/Skill"
+      },
+      "title": "Skills",
+      "type": "array"
+    },
+    "progression": {
+      "items": {
+        "$ref": "#/$defs/Progression"
+      },
+      "minItems": 1,
+      "title": "Progression",
+      "type": "array"
+    },
+    "classes": {
+      "items": {
+        "$ref": "#/$defs/ClassDefinition"
+      },
+      "title": "Classes",
+      "type": "array"
+    },
+    "species": {
+      "items": {
+        "$ref": "#/$defs/Species"
+      },
+      "title": "Species",
+      "type": "array"
+    },
+    "factions": {
+      "items": {
+        "$ref": "#/$defs/Faction"
+      },
+      "minItems": 1,
+      "title": "Factions",
+      "type": "array"
+    },
+    "regions": {
+      "items": {
+        "$ref": "#/$defs/Region"
+      },
+      "maxItems": 12,
+      "minItems": 1,
+      "title": "Regions",
+      "type": "array"
+    },
+    "locations": {
+      "items": {
+        "$ref": "#/$defs/Location"
+      },
+      "maxItems": 120,
+      "minItems": 1,
+      "title": "Locations",
+      "type": "array"
+    },
+    "npcs": {
+      "items": {
+        "$ref": "#/$defs/NPC"
+      },
+      "minItems": 1,
+      "title": "Npcs",
+      "type": "array"
+    },
+    "enemies": {
+      "items": {
+        "$ref": "#/$defs/EnemyArchetype"
+      },
+      "minItems": 1,
+      "title": "Enemies",
+      "type": "array"
+    },
+    "quests": {
+      "items": {
+        "$ref": "#/$defs/Quest"
+      },
+      "minItems": 1,
+      "title": "Quests",
+      "type": "array"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/Item"
+      },
+      "title": "Items",
+      "type": "array"
+    },
+    "crafting": {
+      "items": {
+        "$ref": "#/$defs/Recipe"
+      },
+      "title": "Crafting",
+      "type": "array"
+    },
+    "encounters": {
+      "items": {
+        "$ref": "#/$defs/EncounterTable"
+      },
+      "minItems": 1,
+      "title": "Encounters",
+      "type": "array"
+    },
+    "dialogues": {
+      "items": {
+        "$ref": "#/$defs/Dialogue"
+      },
+      "minItems": 1,
+      "title": "Dialogues",
+      "type": "array"
+    },
+    "world_events": {
+      "items": {
+        "$ref": "#/$defs/WorldEvent"
+      },
+      "title": "World Events",
+      "type": "array"
+    },
+    "history": {
+      "items": {
+        "$ref": "#/$defs/HistoryEntry"
+      },
+      "title": "History",
+      "type": "array"
+    },
+    "economy": {
+      "$ref": "#/$defs/Economy"
+    },
+    "assets": {
+      "items": {
+        "$ref": "#/$defs/Asset"
+      },
+      "title": "Assets",
+      "type": "array"
+    }
+  },
+  "required": [
+    "metadata",
+    "creative_direction",
+    "visual_style",
+    "audio_direction",
+    "world_rules",
+    "player",
+    "stats",
+    "resources",
+    "damage_types",
+    "abilities",
+    "progression",
+    "factions",
+    "regions",
+    "locations",
+    "npcs",
+    "enemies",
+    "quests",
+    "encounters",
+    "dialogues",
+    "economy"
+  ],
+  "title": "RealmSpec",
+  "type": "object"
+}

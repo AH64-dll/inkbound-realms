@@ -1,0 +1,2265 @@
+{
+  "realm_spec_version": 1,
+  "metadata": {
+    "id": "realm.fantasy",
+    "title": "The Saltglass Covenant",
+    "seed": 42,
+    "source_digest": "15614b6b47d0ea8fcb4a701b7a8cee29c4b15cc1f45829cf4d075405d4ee55c1",
+    "source_title": "The Saltglass Covenant — original fixture story",
+    "authoring_provider": "hand-authored fixture",
+    "adaptation": {
+      "mode": "licensed_adaptation",
+      "rights_basis": "Original fixture story authored for this project",
+      "allow_source_names": true
+    },
+    "revision": 1
+  },
+  "creative_direction": {
+    "interpretation": {
+      "summary": "The tide was a common road until the levy syndicate began measuring it as property. Surveyor Iven watched the pumps at Knotmarket fail under a tariff nobody had voted for. The drowned registry held the last communal ledger. Mara, who mended pumps without asking a name, warned that the old metering warden still obeyed claims from a vanished age. Iven's lens could shift a little water, but each working blurred a memory. They would have to choose which debts a town ought to remember, and which gates it could afford to open.",
+      "genre": "maritime ecological fantasy",
+      "tone": [
+        "salt-worn",
+        "politically uneasy",
+        "hopeful through repair"
+      ],
+      "themes": [
+        "public stewardship against private ownership",
+        "obligations to strangers",
+        "repair carries a price"
+      ],
+      "era": "A coastal age of tidal engines and sail",
+      "technology": "Wind-driven boats, salt lenses and tide pumps",
+      "supernatural_rules": "Memories crystallize in salt; lenses redirect tides but erode the operator's recollections.",
+      "archetypes": [
+        "Tide surveyor",
+        "Harbor pumpwright",
+        "An obsolete institutional enforcer"
+      ],
+      "factions_and_cultures": [
+        "No person may own a tide line.",
+        "Crews record debts in rope knots and settle disagreements at ebb tide."
+      ],
+      "social_structures": "A mutual-aid group challenges control of essential infrastructure.",
+      "geography": "tidal forest and fractured salt marsh",
+      "conflicts": [
+        "Reopen the common sluice without handing its control to the levy syndicate."
+      ],
+      "relationships": [
+        "The protagonist owes a practical debt to the guide; both need the residents' trust."
+      ],
+      "narrative_structure": "Discover the excluded, recover their record, then open the institution to shared control.",
+      "danger": "Ordinary enforcers teach tactics before a stronger guardian.",
+      "morality": "Care does not justify ownership of another life.",
+      "atmosphere": "salt-worn",
+      "economy": "harbor marks",
+      "combat_style": "Surveyor's hook",
+      "important_objects": [
+        "Common tide ledger",
+        "Sounding hook"
+      ],
+      "progression_opportunities": [
+        "Learn field recovery",
+        "Gain authority through deeds",
+        "Master occupational tools"
+      ]
+    },
+    "world_bible": "The tide was a common road until the levy syndicate began measuring it as property. Surveyor Iven watched the pumps at Knotmarket fail under a tariff nobody had voted for. The drowned registry held the last communal ledger. Mara, who mended pumps without asking a name, warned that the old metering warden still obeyed claims from a vanished age. Iven's lens could shift a little water, but each working blurred a memory. They would have to choose which debts a town ought to remember, and which gates it could afford to open.",
+    "gameplay_identity": "Play a tide surveyor, recover contested records, use occupational tools or negotiate, and turn discoveries into institutional change.",
+    "originality_strategy": "Independent original fixture story and cast; no external book adaptation.",
+    "main_narrative": "Reopen the common sluice without handing its control to the levy syndicate.",
+    "side_narratives": [
+      "Make discarded components useful to neighbors."
+    ],
+    "quality_criteria": [
+      "Every quest changes a practical obligation",
+      "Tools express the player's occupation",
+      "The final gate opens through shared knowledge, not arbitrary level gating"
+    ]
+  },
+  "visual_style": "Salt-dark map tiles, pale teal lenses, mustard quest compass; optional ASCII.",
+  "audio_direction": "Short wooden clicks, low surf ambience, glass notes for discoveries.",
+  "world_rules": {
+    "health_resource_id": "resource.health",
+    "power_stat_id": "stat.power",
+    "armor_stat_id": "stat.armor",
+    "speed_stat_id": "stat.speed",
+    "influence_stat_id": "stat.influence",
+    "default_damage_type_id": "damage.main",
+    "default_ability_id": "ability.strike",
+    "turns_per_day": 144,
+    "death_gold_percent": 50,
+    "inventory_capacity": 80,
+    "supported_mechanics": [
+      "guard",
+      "quick",
+      "heavy",
+      "ranged",
+      "crafting",
+      "companions",
+      "factions",
+      "frontier",
+      "status",
+      "negotiation"
+    ]
+  },
+  "player": {
+    "id": "player.main",
+    "name": "Iven Reedwake",
+    "description": "Tide surveyor",
+    "provenance": {
+      "concepts": [
+        "public stewardship against private ownership",
+        "obligations to strangers"
+      ],
+      "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+      "source_chunk_ids": [
+        "chunk.0000"
+      ],
+      "transformations": {
+        "identity": "Original cast",
+        "background": "Original institutional history",
+        "motivation": "Collective repair",
+        "relationships": "New local obligations",
+        "geography": "Original topology",
+        "naming": "Independently authored names"
+      }
+    },
+    "visual": {
+      "glyph": "@",
+      "color": "#67cfc8",
+      "asset_id": null,
+      "animation_ids": []
+    },
+    "archetype": "Tide surveyor",
+    "background": "A former levy clerk whose own village flooded after an inaccurate coastal survey.",
+    "appearance": "Patched oilskin, a prism strapped to the left wrist, and tide-height knots braided into silver hair.",
+    "motivations": [
+      "Reopen the common sluice without handing its control to the levy syndicate."
+    ],
+    "personality": [
+      "keeps meticulous promises",
+      "distrusts clean accounts",
+      "offers help before asking allegiance"
+    ],
+    "stats": {
+      "stat.power": 5,
+      "stat.armor": 1,
+      "stat.speed": 4,
+      "stat.influence": 6
+    },
+    "resources": {
+      "resource.health": 60,
+      "resource.energy": 14
+    },
+    "movement": "walk",
+    "equipment_slots": [
+      "slot.tool",
+      "slot.body",
+      "slot.record"
+    ],
+    "ability_ids": [
+      "ability.strike",
+      "ability.special",
+      "ability.negotiate"
+    ],
+    "interaction_ability_ids": [
+      "ability.negotiate"
+    ],
+    "passive_traits": [
+      "Learns from maintaining rather than conquering"
+    ],
+    "special_mechanics": [
+      "negotiation",
+      "crafting"
+    ],
+    "starting_items": {
+      "item.weapon": 1,
+      "item.armor": 1,
+      "item.potion": 2,
+      "item.material": 2
+    },
+    "vulnerabilities": {},
+    "resistances": {},
+    "progression_id": "progression.main",
+    "starting_location_id": "location.home",
+    "species_id": null,
+    "class_id": null
+  },
+  "stats": [
+    {
+      "id": "stat.power",
+      "name": "Force",
+      "description": "Strength of an intentional action.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "role": "power",
+      "minimum": 0,
+      "maximum": 10000
+    },
+    {
+      "id": "stat.armor",
+      "name": "Protection",
+      "description": "Mitigates incoming harm.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "role": "armor",
+      "minimum": 0,
+      "maximum": 10000
+    },
+    {
+      "id": "stat.speed",
+      "name": "Agility",
+      "description": "Helps movement and escape.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "role": "speed",
+      "minimum": 0,
+      "maximum": 10000
+    },
+    {
+      "id": "stat.influence",
+      "name": "Credibility",
+      "description": "Supports negotiations and testimony.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "role": "influence",
+      "minimum": 0,
+      "maximum": 10000
+    }
+  ],
+  "resources": [
+    {
+      "id": "resource.health",
+      "name": "Vitality",
+      "description": "The capacity to stay in play.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "role": "health",
+      "maximum": 60,
+      "regen": 0
+    },
+    {
+      "id": "resource.energy",
+      "name": "Tidal focus",
+      "description": "Occupational capacity restored with time and rest.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "role": "energy",
+      "maximum": 14,
+      "regen": 1
+    }
+  ],
+  "damage_types": [
+    {
+      "id": "damage.main",
+      "name": "Pressure",
+      "description": "The realm's primary means of affecting an opponent.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      }
+    }
+  ],
+  "equipment_slots": [
+    {
+      "id": "slot.tool",
+      "name": "Working tool",
+      "description": "A held occupational implement.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      }
+    },
+    {
+      "id": "slot.body",
+      "name": "Protective wear",
+      "description": "A wearable layer of protection.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      }
+    },
+    {
+      "id": "slot.record",
+      "name": "Kept record",
+      "description": "A carried authoritative record.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      }
+    }
+  ],
+  "abilities": [
+    {
+      "id": "ability.strike",
+      "name": "Surveyor's hook",
+      "description": "A reliable close-range action with no energy cost.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "/",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "target": "enemy",
+      "range": 1,
+      "radius": 0,
+      "cost": {},
+      "cooldown": 0,
+      "accuracy": 100,
+      "power_scale": 1,
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 5,
+          "damage_type": "damage.main",
+          "resource_id": null,
+          "status_id": null,
+          "enemy_id": null,
+          "duration": 1
+        }
+      ]
+    },
+    {
+      "id": "ability.special",
+      "name": "Prism undertow",
+      "description": "Strip a guard's stance with a focused pressure wave.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "*",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "target": "enemy",
+      "range": 4,
+      "radius": 0,
+      "cost": {
+        "resource.energy": 3
+      },
+      "cooldown": 2,
+      "accuracy": 100,
+      "power_scale": 0,
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 12,
+          "damage_type": "damage.main",
+          "resource_id": null,
+          "status_id": null,
+          "enemy_id": null,
+          "duration": 1
+        },
+        {
+          "kind": "status",
+          "amount": 0,
+          "damage_type": null,
+          "resource_id": null,
+          "status_id": "status.fault",
+          "enemy_id": null,
+          "duration": 2
+        }
+      ]
+    },
+    {
+      "id": "ability.negotiate",
+      "name": "Offer terms",
+      "description": "A nonviolent approach tests the protagonist's influence against the target's resolve.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "target": "enemy",
+      "range": 3,
+      "radius": 0,
+      "cost": {},
+      "cooldown": 0,
+      "accuracy": 100,
+      "power_scale": 0,
+      "effects": [
+        {
+          "kind": "negotiate",
+          "amount": 4,
+          "damage_type": null,
+          "resource_id": null,
+          "status_id": null,
+          "enemy_id": null,
+          "duration": 1
+        }
+      ]
+    },
+    {
+      "id": "ability.mend",
+      "name": "Steady hands",
+      "description": "Recover health using the realm's finite secondary resource.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "+",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "target": "self",
+      "range": 0,
+      "radius": 0,
+      "cost": {
+        "resource.energy": 4
+      },
+      "cooldown": 0,
+      "accuracy": 100,
+      "power_scale": 0,
+      "effects": [
+        {
+          "kind": "heal",
+          "amount": 15,
+          "damage_type": null,
+          "resource_id": "resource.health",
+          "status_id": null,
+          "enemy_id": null,
+          "duration": 1
+        }
+      ]
+    },
+    {
+      "id": "ability.foe",
+      "name": "Desperate grasp",
+      "description": "A readable adjacent threat.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "target": "enemy",
+      "range": 1,
+      "radius": 0,
+      "cost": {},
+      "cooldown": 0,
+      "accuracy": 100,
+      "power_scale": 0,
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 4,
+          "damage_type": "damage.main",
+          "resource_id": null,
+          "status_id": null,
+          "enemy_id": null,
+          "duration": 1
+        }
+      ]
+    },
+    {
+      "id": "ability.volley",
+      "name": "A distant claim",
+      "description": "A telegraphed ranged reply.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "target": "enemy",
+      "range": 4,
+      "radius": 0,
+      "cost": {},
+      "cooldown": 0,
+      "accuracy": 100,
+      "power_scale": 0,
+      "effects": [
+        {
+          "kind": "damage",
+          "amount": 5,
+          "damage_type": "damage.main",
+          "resource_id": null,
+          "status_id": null,
+          "enemy_id": null,
+          "duration": 1
+        }
+      ]
+    }
+  ],
+  "status_effects": [
+    {
+      "id": "status.fault",
+      "name": "Salt-scoured",
+      "description": "A temporary disruption rewards planning around an opponent's turn.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "tick_damage": 2,
+      "damage_type": "damage.main",
+      "stat_mods": {},
+      "skip_turn": false
+    }
+  ],
+  "skills": [
+    {
+      "id": "skill.practice",
+      "name": "Field practice",
+      "description": "Repeated decisive actions build confidence.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "training_action": "combat",
+      "threshold": 5,
+      "ability_ids": [],
+      "stat_mods": {
+        "stat.power": 1
+      },
+      "prerequisites": []
+    },
+    {
+      "id": "skill.repair",
+      "name": "Patient repair",
+      "description": "Repeated repairs unlock personal recovery.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "training_action": "craft",
+      "threshold": 2,
+      "ability_ids": [
+        "ability.mend"
+      ],
+      "stat_mods": {},
+      "prerequisites": []
+    }
+  ],
+  "progression": [
+    {
+      "id": "progression.main",
+      "name": "A practiced hand",
+      "description": "Growth follows meaningful encounters and practical help.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "xp_per_level": 100,
+      "stat_growth": {
+        "stat.power": 1,
+        "stat.influence": 1
+      },
+      "resource_growth": {
+        "resource.health": 8,
+        "resource.energy": 2
+      },
+      "unlocks": {
+        "2": [
+          "ability.mend"
+        ]
+      },
+      "skill_ids": [
+        "skill.practice",
+        "skill.repair"
+      ]
+    }
+  ],
+  "classes": [],
+  "species": [],
+  "factions": [
+    {
+      "id": "faction.commons",
+      "name": "The Sounding Commons",
+      "description": "A local institution whose trust changes access and recognition.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "ideology": "No person may own a tide line.",
+      "culture": "Crews record debts in rope knots and settle disagreements at ebb tide.",
+      "goals": [
+        "Reopen the common sluice without handing its control to the levy syndicate."
+      ],
+      "relationships": {},
+      "home_location_id": "location.home"
+    }
+  ],
+  "regions": [
+    {
+      "id": "region.first",
+      "name": "The Glasswater Reach",
+      "description": "A connected region with a safe hearth, an ordinary delve and a locked final conflict.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "biome": "tidal forest and fractured salt marsh",
+      "atmosphere": "salt-worn",
+      "generator": "wilderness",
+      "width": 64,
+      "height": 40,
+      "danger": 1,
+      "faction_ids": [
+        "faction.commons"
+      ],
+      "neighbor_ids": [],
+      "frontier": true
+    }
+  ],
+  "locations": [
+    {
+      "id": "location.home",
+      "name": "Knotmarket",
+      "description": "A walkable settlement with rumors, care, trade and competing obligations.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "O",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "region_id": "region.first",
+      "kind": "settlement",
+      "x": 8,
+      "y": 10,
+      "faction_id": "faction.commons",
+      "depth": 1,
+      "theme": "",
+      "locked_by": [],
+      "market_items": {
+        "item.potion": 8,
+        "item.material": 12,
+        "item.armor": 2
+      },
+      "entry_actions": [],
+      "lore": "The sluice ledger is below the registry. Bring it back before anyone sells us a dry future."
+    },
+    {
+      "id": "location.delve",
+      "name": "The Drowned Registry",
+      "description": "Recover records among threats shaped by the realm's central conflict.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "D",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "region_id": "region.first",
+      "kind": "dungeon",
+      "x": 24,
+      "y": 14,
+      "faction_id": null,
+      "depth": 1,
+      "theme": "",
+      "locked_by": [],
+      "market_items": {},
+      "entry_actions": [],
+      "lore": "An abandoned institution still enforces rules that the living no longer accept."
+    },
+    {
+      "id": "location.final",
+      "name": "The Closed Sluice",
+      "description": "The final confrontation changes an institution, not just a kill counter.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "D",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "region_id": "region.first",
+      "kind": "dungeon",
+      "x": 43,
+      "y": 25,
+      "faction_id": null,
+      "depth": 1,
+      "theme": "",
+      "locked_by": [
+        {
+          "kind": "quest_done",
+          "target": "quest.record",
+          "amount": 1,
+          "negate": false
+        }
+      ],
+      "market_items": {},
+      "entry_actions": [],
+      "lore": "The recovered record is the authority that opens this gate."
+    },
+    {
+      "id": "location.refuge",
+      "name": "Ebb shelter",
+      "description": "A road landmark offers rest and an account of an earlier failed repair.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "*",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "region_id": "region.first",
+      "kind": "shrine",
+      "x": 18,
+      "y": 22,
+      "faction_id": null,
+      "depth": 1,
+      "theme": "",
+      "locked_by": [],
+      "market_items": {},
+      "entry_actions": [],
+      "lore": "A previous crew left a lesson: keep a witness to every promise."
+    }
+  ],
+  "npcs": [
+    {
+      "id": "npc.guide",
+      "name": "Mara Brinehook",
+      "description": "A guide with a practical stake, not a generic quest dispenser.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "n",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "role": "Harbor pumpwright",
+      "background": "Kept the settlement functioning after its formal authority failed.",
+      "motivation": "Keep communal pumps working through the spring surge.",
+      "personality": "Candid about costs, attentive to frightened neighbors.",
+      "location_id": "location.home",
+      "faction_id": "faction.commons",
+      "dialogue_id": "dialogue.guide",
+      "relationships": {},
+      "services": [
+        "shop",
+        "heal",
+        "rumor",
+        "history",
+        "scout"
+      ]
+    }
+  ],
+  "enemies": [
+    {
+      "id": "enemy.guard",
+      "name": "Levy skiff guard",
+      "description": "A debt enforcer who protects the syndicate's seized survey records.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "E",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "family_id": "family.enforcers",
+      "role": "enemy",
+      "behavior": "melee",
+      "stats": {
+        "stat.power": 2,
+        "stat.armor": 0,
+        "stat.speed": 3,
+        "stat.influence": 2
+      },
+      "resources": {
+        "resource.health": 22
+      },
+      "ability_ids": [
+        "ability.foe"
+      ],
+      "resistances": {},
+      "vulnerabilities": {},
+      "loot": {
+        "item.material": 2
+      },
+      "xp": 30,
+      "gold": 8,
+      "faction_id": null,
+      "negotiation_difficulty": 8,
+      "phase_ability_ids": []
+    },
+    {
+      "id": "enemy.creature",
+      "name": "Brackish lens-mite",
+      "description": "A translucent scavenger that nests inside abandoned salt lenses.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "e",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "family_id": "family.scavengers",
+      "role": "creature",
+      "behavior": "melee",
+      "stats": {
+        "stat.power": 2,
+        "stat.armor": 0,
+        "stat.speed": 2,
+        "stat.influence": 0
+      },
+      "resources": {
+        "resource.health": 16
+      },
+      "ability_ids": [
+        "ability.foe"
+      ],
+      "resistances": {},
+      "vulnerabilities": {},
+      "loot": {
+        "item.material": 1
+      },
+      "xp": 20,
+      "gold": 3,
+      "faction_id": null,
+      "negotiation_difficulty": 12,
+      "phase_ability_ids": []
+    },
+    {
+      "id": "enemy.keeper",
+      "name": "Registry keeper",
+      "description": "A sentry guarding the record. Can be overcome by force or an occupation-specific nonviolent action.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "K",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "family_id": "family.enforcers",
+      "role": "enemy",
+      "behavior": "melee",
+      "stats": {
+        "stat.power": 3,
+        "stat.armor": 1,
+        "stat.speed": 2,
+        "stat.influence": 4
+      },
+      "resources": {
+        "resource.health": 36
+      },
+      "ability_ids": [
+        "ability.foe"
+      ],
+      "resistances": {},
+      "vulnerabilities": {},
+      "loot": {
+        "item.relic": 1,
+        "item.material": 2
+      },
+      "xp": 40,
+      "gold": 10,
+      "faction_id": null,
+      "negotiation_difficulty": 10,
+      "phase_ability_ids": []
+    },
+    {
+      "id": "enemy.boss",
+      "name": "The Metered Warden",
+      "description": "An automaton built to ration floods; it obeys obsolete property claims at the closed sluice.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "B",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "family_id": "family.enforcers",
+      "role": "boss",
+      "behavior": "melee",
+      "stats": {
+        "stat.power": 5,
+        "stat.armor": 2,
+        "stat.speed": 3,
+        "stat.influence": 5
+      },
+      "resources": {
+        "resource.health": 70
+      },
+      "ability_ids": [
+        "ability.foe",
+        "ability.volley"
+      ],
+      "resistances": {},
+      "vulnerabilities": {},
+      "loot": {
+        "item.material": 4
+      },
+      "xp": 100,
+      "gold": 40,
+      "faction_id": null,
+      "negotiation_difficulty": 16,
+      "phase_ability_ids": [
+        "ability.volley"
+      ]
+    }
+  ],
+  "quests": [
+    {
+      "id": "quest.survey",
+      "name": "Sound the drowned rooms",
+      "description": "Discover the abandoned institution, meet its ordinary dangers and learn why the record matters.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "arc_id": "arc.common",
+      "giver_id": "npc.guide",
+      "prerequisites": [],
+      "objectives": [
+        {
+          "kind": "visit",
+          "target_id": "location.delve",
+          "count": 1,
+          "destination_id": null,
+          "consume": false
+        }
+      ],
+      "reward_actions": [
+        {
+          "kind": "gold",
+          "target": null,
+          "amount": 12
+        },
+        {
+          "kind": "xp",
+          "target": null,
+          "amount": 40
+        }
+      ],
+      "main": true,
+      "discovered": true,
+      "deadline_turns": null
+    },
+    {
+      "id": "quest.record",
+      "name": "A ledger belongs to everyone",
+      "description": "The sluice ledger is below the registry. Bring it back before anyone sells us a dry future.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "&",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "arc_id": "arc.common",
+      "giver_id": "npc.guide",
+      "prerequisites": [
+        "quest.survey"
+      ],
+      "objectives": [
+        {
+          "kind": "collect",
+          "target_id": "item.relic",
+          "count": 1,
+          "destination_id": null,
+          "consume": true
+        }
+      ],
+      "reward_actions": [
+        {
+          "kind": "xp",
+          "target": null,
+          "amount": 60
+        },
+        {
+          "kind": "standing",
+          "target": "faction.commons",
+          "amount": 5
+        },
+        {
+          "kind": "unlock",
+          "target": "location.final",
+          "amount": 1
+        }
+      ],
+      "main": true,
+      "discovered": false,
+      "deadline_turns": null
+    },
+    {
+      "id": "quest.final",
+      "name": "Break the flood tariff",
+      "description": "Resolve the institution's final enforcer. Nonviolent resolution counts as overcoming the threat.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "X",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "arc_id": "arc.common",
+      "giver_id": "npc.guide",
+      "prerequisites": [
+        "quest.record"
+      ],
+      "objectives": [
+        {
+          "kind": "kill",
+          "target_id": "enemy.boss",
+          "count": 1,
+          "destination_id": null,
+          "consume": false
+        }
+      ],
+      "reward_actions": [
+        {
+          "kind": "xp",
+          "target": null,
+          "amount": 120
+        },
+        {
+          "kind": "gold",
+          "target": null,
+          "amount": 40
+        },
+        {
+          "kind": "flag",
+          "target": "flag.charter_open",
+          "amount": 1
+        },
+        {
+          "kind": "standing",
+          "target": "faction.commons",
+          "amount": 10
+        }
+      ],
+      "main": true,
+      "discovered": false,
+      "deadline_turns": null
+    },
+    {
+      "id": "quest.salvage",
+      "name": "A repair for the road",
+      "description": "Make field recovery from what the institution discarded.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "+",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "arc_id": "arc.repair",
+      "giver_id": "npc.guide",
+      "prerequisites": [],
+      "objectives": [
+        {
+          "kind": "craft",
+          "target_id": "recipe.recovery",
+          "count": 1,
+          "destination_id": null,
+          "consume": false
+        }
+      ],
+      "reward_actions": [
+        {
+          "kind": "xp",
+          "target": null,
+          "amount": 25
+        },
+        {
+          "kind": "gold",
+          "target": null,
+          "amount": 6
+        }
+      ],
+      "main": false,
+      "discovered": true,
+      "deadline_turns": null
+    }
+  ],
+  "items": [
+    {
+      "id": "item.weapon",
+      "name": "Sounding hook",
+      "description": "A tool tied to the protagonist's occupation, useful in a fight.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "/",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "kind": "equipment",
+      "slot_id": "slot.tool",
+      "price": 18,
+      "stat_mods": {
+        "stat.power": 2
+      },
+      "resistances": {},
+      "ability_ids": [],
+      "effects": [],
+      "tags": []
+    },
+    {
+      "id": "item.armor",
+      "name": "Waxed survey coat",
+      "description": "Protective clothing built for this realm's ordinary labor.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "[",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "kind": "equipment",
+      "slot_id": "slot.body",
+      "price": 20,
+      "stat_mods": {
+        "stat.armor": 1
+      },
+      "resistances": {},
+      "ability_ids": [],
+      "effects": [],
+      "tags": []
+    },
+    {
+      "id": "item.material",
+      "name": "Lens shard",
+      "description": "A salvageable component that connects encounters to field recovery.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "%",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "kind": "material",
+      "slot_id": null,
+      "price": 4,
+      "stat_mods": {},
+      "resistances": {},
+      "ability_ids": [],
+      "effects": [],
+      "tags": []
+    },
+    {
+      "id": "item.potion",
+      "name": "Brine poultice",
+      "description": "Single-use field recovery; crafting is an alternative to buying it.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "!",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "kind": "consumable",
+      "slot_id": null,
+      "price": 10,
+      "stat_mods": {},
+      "resistances": {},
+      "ability_ids": [],
+      "effects": [
+        {
+          "kind": "heal",
+          "amount": 20,
+          "damage_type": null,
+          "resource_id": "resource.health",
+          "status_id": null,
+          "enemy_id": null,
+          "duration": 1
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "item.relic",
+      "name": "Common tide ledger",
+      "description": "A public record whose recovery changes who may control the final area.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "&",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "kind": "artifact",
+      "slot_id": "slot.record",
+      "price": 40,
+      "stat_mods": {
+        "stat.influence": 2
+      },
+      "resistances": {},
+      "ability_ids": [],
+      "effects": [],
+      "tags": []
+    }
+  ],
+  "crafting": [
+    {
+      "id": "recipe.recovery",
+      "name": "Field recovery",
+      "description": "Use salvaged local materials to maintain the protagonist's health.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "ingredients": {
+        "item.material": 2
+      },
+      "outputs": {
+        "item.potion": 1
+      },
+      "gold_cost": 0,
+      "required_skill_id": null
+    }
+  ],
+  "encounters": [
+    {
+      "id": "encounter.road",
+      "name": "Road pressure",
+      "description": "A few threats teach the world outside the safe settlement.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "region_id": "region.first",
+      "location_id": null,
+      "enemy_counts": {
+        "enemy.creature": 2
+      },
+      "conditions": [],
+      "respawn_turns": 40
+    },
+    {
+      "id": "encounter.delve",
+      "name": "Record defenders",
+      "description": "A short delve guards the source of the final gate's authority.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "region_id": "region.first",
+      "location_id": "location.delve",
+      "enemy_counts": {
+        "enemy.guard": 2,
+        "enemy.keeper": 1
+      },
+      "conditions": [],
+      "respawn_turns": 0
+    },
+    {
+      "id": "encounter.final",
+      "name": "Institutional guardian",
+      "description": "A culminating threat protects a failing charter.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "region_id": "region.first",
+      "location_id": "location.final",
+      "enemy_counts": {
+        "enemy.boss": 1
+      },
+      "conditions": [],
+      "respawn_turns": 0
+    }
+  ],
+  "dialogues": [
+    {
+      "id": "dialogue.guide",
+      "name": "The guide's account",
+      "description": "An original invitation to participate in this realm's conflict.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "style": "Measured, concrete, never grandiose; uses tide and repair metaphors sparingly.",
+      "start_node_id": "node.welcome",
+      "nodes": [
+        {
+          "id": "node.welcome",
+          "text": "The sluice ledger is below the registry. Bring it back before anyone sells us a dry future.",
+          "choices": [
+            {
+              "id": "choice.why",
+              "text": "Who would be left out?",
+              "next_node_id": "node.stakes",
+              "conditions": [],
+              "actions": []
+            },
+            {
+              "id": "choice.leave",
+              "text": "I will take a look.",
+              "next_node_id": null,
+              "conditions": [],
+              "actions": []
+            }
+          ]
+        },
+        {
+          "id": "node.stakes",
+          "text": "The people keeping this place alive have no place in its official record. If we disappear, its rulers will call the accounts balanced.",
+          "choices": [
+            {
+              "id": "choice.return",
+              "text": "Tell me where to start.",
+              "next_node_id": "node.welcome",
+              "conditions": [],
+              "actions": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "world_events": [
+    {
+      "id": "event.charter",
+      "name": "The gates remain open",
+      "description": "A victory becomes public history and the world remains explorable.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "conditions": [
+        {
+          "kind": "flag",
+          "target": "flag.charter_open",
+          "amount": 1,
+          "negate": false
+        }
+      ],
+      "actions": [
+        {
+          "kind": "flag",
+          "target": "flag.victory",
+          "amount": 1
+        }
+      ],
+      "once": true,
+      "cooldown_turns": 20
+    }
+  ],
+  "history": [
+    {
+      "year": -20,
+      "event": "Essential infrastructure passed from a shared undertaking into a closed charter.",
+      "entity_ids": [
+        "faction.commons",
+        "location.final"
+      ]
+    },
+    {
+      "year": -1,
+      "event": "The guide began keeping unofficial records of the excluded residents.",
+      "entity_ids": [
+        "npc.guide",
+        "item.relic"
+      ]
+    }
+  ],
+  "economy": {
+    "currency_name": "harbor marks",
+    "starting_gold": 20,
+    "rest_price": 3,
+    "heal_price": 5,
+    "caravan_price": 8,
+    "sell_percent": 50
+  },
+  "assets": [
+    {
+      "id": "asset.player",
+      "name": "Protagonist glyph",
+      "description": "Readable occupational silhouette with a guaranteed ASCII fallback.",
+      "provenance": {
+        "concepts": [
+          "public stewardship against private ownership",
+          "obligations to strangers"
+        ],
+        "rationale": "Supports tide surveyor play in The Glasswater Reach.",
+        "source_chunk_ids": [
+          "chunk.0000"
+        ],
+        "transformations": {
+          "identity": "Original cast",
+          "background": "Original institutional history",
+          "motivation": "Collective repair",
+          "relationships": "New local obligations",
+          "geography": "Original topology",
+          "naming": "Independently authored names"
+        }
+      },
+      "visual": {
+        "glyph": "?",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "kind": "glyph",
+      "provider": "fallback",
+      "path": null,
+      "sha256": null,
+      "fallback": {
+        "glyph": "@",
+        "color": "#67cfc8",
+        "asset_id": null,
+        "animation_ids": []
+      },
+      "prompt": ""
+    }
+  ]
+}
