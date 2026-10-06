@@ -73,7 +73,7 @@ inkbound compile fixtures/books/science_fiction.txt realms/live-relay \
 
 A completed experiment must validate the resulting package, inspect its creative
 quality, play its linked objectives/combat/progression and verify save/resume.
-Structured transport alone is insufficient evidence. The 243 passing automated
+Structured transport alone is insufficient evidence. The 244 passing automated
 tests, fixture campaigns, screenshots and wheel-install smoke test establish
 their own narrower scopes.
 
@@ -87,7 +87,7 @@ No auth broker or exported credential was needed. The adapter forwards atomic
 OpenAI-shaped tool requests through OMP's own authentication, retaining bounded
 retries and timeouts, schema validation, usage accounting and output-only caches.
 
-A fresh whole pipeline, without reusing Qwen responses, is running with:
+A fresh whole pipeline, without reusing Qwen responses, was started with:
 
 ```bash
 inkbound compile fixtures/books/science_fiction.txt realms/live-swe2 \
@@ -109,3 +109,33 @@ new critique. Validation issues are sorted for reproducible caching. Reviews are
 bounded to six rounds within the authoring call budget. Quest repair prompts
 spell out target kinds and negotiation's existing enemy-resolution behavior.
 The resumed run remains pending final validation and gameplay.
+
+
+## OMP quota interruption and local handoff (2026-10-06)
+
+The resumed SWE-2 run reached tool call 71/120, during dialogue repair, then
+received HTTP 429 after bounded retries. `omp usage --provider devin --redact
+--no-extensions` confirmed the authenticated Pro account's weekly quota was
+100% used, with approximately four days and sixteen hours until reset; its daily
+quota was 91% used. This is a quota limit, not evidence of invalid authentication.
+No further paid requests were attempted after that check.
+
+The latest accepted critique found malformed settlement dialogue, a missing
+separate clerk conversation, faction-home inconsistency and the climax's main
+quest classification. These repairs and a fresh accepting critique remain
+required. No validated live RealmPackage exists, so live gameplay, creative
+inspection and save/resume remain unverified. Accepted model responses remain in
+`.cache/authoring/`; the same compile command above resumes from that cache.
+The cache is local and ignored by git, and should be retained for resumption.
+The provider now distinguishes quota exhaustion from authentication errors
+without printing provider diagnostics or credentials.
+
+The user requested keeping the branch and PR draft local. No branch was pushed
+and no PR was published. The draft and implementation ledger explicitly retain
+the live verification gates.
+
+Final local handoff checks: 244 tests passed in 21.13 seconds. The current wheel
+was rebuilt and reinstalled into `.cache/wheel-smoke`, then its installed CLI
+validated the science-fiction fixture with no issues from `/tmp`. Its three-frame
+GUI launch completed successfully; the resulting capture was visually reviewed.
+This verifies the installed fixture runtime, not the unfinished SWE-2 realm.

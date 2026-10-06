@@ -35,7 +35,7 @@ work just because a smaller slice runs.
 15. [x] README and architecture/migration/originality documentation; PR
     description with before/after, motivation, preserved features, capabilities,
     examples/screenshots, tests, performance, limitations and future work.
-16. [ ] Final clean commits/branch and reviewable local PR draft.
+16. [x] Final commits/branch and reviewable local PR draft.
     The user explicitly requested keeping the PR local; publication is no longer
     a completion gate for this session.
 
@@ -44,15 +44,13 @@ original request. Offline fixtures do not prove live semantic authorship;
 render smoke tests do not prove a whole campaign is enjoyable. Persist genuine
 limitations and verify the largest possible authorized scope before handoff.
 
-Current evidence: 243 tests passed, including HTTP streaming, server-disconnect
-and retry checks. The local model returned structured source analysis and a
-world identity, but both contained copied passages and cannot be accepted.
-Fresh-prose guards now run during reading and creative-foundation construction.
-A newer instruction model accepted fresh analysis, creative direction, rules,
-region and faction; its settlement validation is being retried.
-No validated live-authored realm has been produced yet; repeated global OOM
-events from another workload also interrupted the isolated local model server.
-Runtime launch/captures, full fixture campaigns and installation via uv succeeded.
-Runtime preferences and
-living escort save/recovery behavior are covered. Economic reachability uses
-conservative bounds; it is not a proof of every strategy or of game balance.
+Current evidence: the automated suite, full fixture campaigns, runtime captures
+and isolated wheel installation pass their scoped checks. The selected SWE-2
+backend through OMP completed construction and several repair reviews, but its
+weekly quota was exhausted during dialogue repair (HTTP 429 at tool 71/120).
+No validated live-authored realm has been produced; its campaign and creative
+review remain pending. The cached model outputs preserve progress for resumption.
+Temporary local Qwen servers were stopped after the user selected SWE-2.
+See `docs/LOCAL_AUTHORING_VERIFICATION.md` for provider evidence and the exact
+resume command. Economic reachability uses conservative bounds; it is not a
+proof of every strategy or of game balance.

@@ -188,6 +188,8 @@ class OMPProvider:
                 if status != 200:
                     if status in (429, 500, 502, 503, 504) and attempt < self.retries:
                         time.sleep(min(2**attempt, 4)); continue
+                    if status == 429:
+                        raise ProviderError("OMP rate limit or quota exhausted; check `omp usage --provider devin --redact` and resume with the same authoring cache when capacity is available")
                     raise ProviderError(f"OMP gateway HTTP {status}; verify model and OMP authentication")
                 data = envelope["body"]
                 return decode_response(data["choices"][0]["message"], self.accounting._usage(data))

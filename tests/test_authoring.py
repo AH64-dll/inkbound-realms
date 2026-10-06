@@ -443,6 +443,24 @@ def test_omp_retries_transient_gateway_status(monkeypatch):
     assert len(attempts) == 2
 
 
+def test_omp_quota_error_preserves_private_diagnostics_and_explains_resume(monkeypatch):
+    from types import SimpleNamespace
+    attempts = []
+    def run(command, **kwargs):
+        attempts.append(1)
+        return SimpleNamespace(returncode=0,
+                               stdout=json.dumps({"id": "inkbound", "status": 429,
+                                                  "body": {"error": "private-key-sentinel"}}),
+                               stderr="private-key-sentinel")
+    monkeypatch.setattr("inkbound.authoring.providers.subprocess.run", run)
+    monkeypatch.setattr("inkbound.authoring.providers.time.sleep", lambda seconds: None)
+    with pytest.raises(ProviderError, match="quota exhausted") as error:
+        OMPProvider("devin/swe-2").complete("system", "prompt", [])
+    assert len(attempts) == 3
+    assert "same authoring cache" in str(error.value)
+    assert "private-key-sentinel" not in str(error.value)
+
+
 def test_cache_does_not_store_prompts_and_tracks_usage(spec, tmp_path):
     p = FixtureToolProvider(spec); cache = CachedProvider(p, tmp_path)
     tool = Tool("define_economy", "economy", TOOL_MODELS["define_economy"].model_json_schema())
