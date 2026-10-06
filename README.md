@@ -59,6 +59,70 @@ The archive's personal PDFs and saves remain local and are excluded from the new
 tracked source. The original updater targets a machine-specific Windows drive;
 the new launcher does not invoke it.
 
+## Play through any AI harness with the MCB server
+
+The **MCB (Model Context Bridge)** server, `inkbound/mcb_server.py`, is a
+standard MCP server (stdio transport) that exposes the running game engine as
+tools. Any MCP-capable harness — OMP, Kodex/Codex, OpenCode, Claude Desktop, or
+your own client — can then *play the game itself*: move, talk, fight, trade,
+craft and follow quests, while the deterministic engine keeps enforcing the
+rules. No API keys are involved; the harness's own model does the playing.
+
+```bash
+# Start and auto-load a realm (the server speaks JSON-RPC on stdio):
+python -m inkbound.mcb_server --realm fixtures/fantasy.json
+
+# Or print ready-to-paste config snippets for common harnesses:
+python -m inkbound.mcb_server --list
+```
+
+Tools exposed: `realm_load`, `status`, `survey` (ASCII map with NPC/enemy
+positions), `move`, `interact`, `talk`, `choose`, `attack`, `ability`,
+`use_item`, `buy`, `sell`, `craft`, `rest`, `flee`, `save`, `journal`.
+Sessions persist in `saves/` and resume on the next `realm_load`.
+
+### Connect a harness
+
+**OMP** — add to `~/.omp/agent/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "inkbound-mcb": {
+      "command": "/path/to/repo/.venv/bin/python",
+      "args": ["-m", "inkbound.mcb_server", "--realm", "fixtures/fantasy.json"],
+      "cwd": "/path/to/repo"
+    }
+  }
+}
+```
+
+**Kodex / Codex CLI** — add to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.inkbound-mcb]
+command = "/path/to/repo/.venv/bin/python"
+args = ["-m", "inkbound.mcb_server", "--realm", "/path/to/repo/fixtures/fantasy.json"]
+```
+
+**OpenCode** — add to `~/.config/opencode/opencode.json` (or a project
+`opencode.json`):
+
+```json
+{
+  "mcp": {
+    "inkbound-mcb": {
+      "type": "local",
+      "command": ["/path/to/repo/.venv/bin/python", "-m", "inkbound.mcb_server", "--realm", "/path/to/repo/fixtures/fantasy.json"],
+      "enabled": true
+    }
+  }
+}
+```
+
+Then just ask the harness: *"Load the realm, survey the area, and head to the
+settlement"* — it drives the game through the tools.
+
 ## Author from a book
 
 Start a tool-capable local or remote model server. Configure its URL/model
