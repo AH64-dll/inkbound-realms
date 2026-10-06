@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+.cache/
+.env
+realms/
+saves/
+legacy/ascii_rpg/saves/
+legacy/ascii_rpg/books/*.pdf
+legacy/ascii_rpg/books/*.epub
+legacy/ascii_rpg/run.log
+artifacts/audit/run.log

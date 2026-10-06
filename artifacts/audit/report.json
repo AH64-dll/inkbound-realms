@@ -1,0 +1,200 @@
+{
+  "source_commit": "fdaa736",
+  "seed": 42,
+  "book": "sample.txt",
+  "temporary_save": "/tmp/inkbound-audit-rfxfy8ox",
+  "elapsed_seconds": 0.602,
+  "world": {
+    "width": 300,
+    "height": 170,
+    "cities": 51,
+    "characters": 89,
+    "sites": 48,
+    "quests": 3,
+    "dormant_quests": 55
+  },
+  "save_load": true,
+  "player_roundtrip": true,
+  "screens": [
+    {
+      "surface": "overworld",
+      "hp": 59,
+      "position": [
+        226,
+        41
+      ],
+      "messages": [
+        "O city, D dungeon, # ruin, * shrine, = road. E talks, J journal.",
+        "Known rumor: Word of the Lyssa for Millhavenmar",
+        "Known rumor: Bounty: Halfallfall",
+        "Known rumor: Carry Terms to Dungar",
+        "55 unheard rumors linger in towns. Talk (E) to hear them."
+      ]
+    },
+    {
+      "surface": "characters",
+      "hp": 59,
+      "position": [
+        226,
+        41
+      ],
+      "messages": [
+        "O city, D dungeon, # ruin, * shrine, = road. E talks, J journal.",
+        "Known rumor: Word of the Lyssa for Millhavenmar",
+        "Known rumor: Bounty: Halfallfall",
+        "Known rumor: Carry Terms to Dungar",
+        "55 unheard rumors linger in towns. Talk (E) to hear them."
+      ]
+    },
+    {
+      "surface": "books",
+      "hp": 59,
+      "position": [
+        226,
+        41
+      ],
+      "messages": [
+        "O city, D dungeon, # ruin, * shrine, = road. E talks, J journal.",
+        "Known rumor: Word of the Lyssa for Millhavenmar",
+        "Known rumor: Bounty: Halfallfall",
+        "Known rumor: Carry Terms to Dungar",
+        "55 unheard rumors linger in towns. Talk (E) to hear them."
+      ]
+    },
+    {
+      "surface": "saves",
+      "hp": 59,
+      "position": [
+        226,
+        41
+      ],
+      "messages": [
+        "O city, D dungeon, # ruin, * shrine, = road. E talks, J journal.",
+        "Known rumor: Word of the Lyssa for Millhavenmar",
+        "Known rumor: Bounty: Halfallfall",
+        "Known rumor: Carry Terms to Dungar",
+        "55 unheard rumors linger in towns. Talk (E) to hear them."
+      ]
+    },
+    {
+      "surface": "settings",
+      "hp": 59,
+      "position": [
+        226,
+        41
+      ],
+      "messages": [
+        "O city, D dungeon, # ruin, * shrine, = road. E talks, J journal.",
+        "Known rumor: Word of the Lyssa for Millhavenmar",
+        "Known rumor: Bounty: Halfallfall",
+        "Known rumor: Carry Terms to Dungar",
+        "55 unheard rumors linger in towns. Talk (E) to hear them."
+      ]
+    },
+    {
+      "surface": "inventory",
+      "hp": 59,
+      "position": [
+        226,
+        41
+      ],
+      "messages": [
+        "O city, D dungeon, # ruin, * shrine, = road. E talks, J journal.",
+        "Known rumor: Word of the Lyssa for Millhavenmar",
+        "Known rumor: Bounty: Halfallfall",
+        "Known rumor: Carry Terms to Dungar",
+        "55 unheard rumors linger in towns. Talk (E) to hear them."
+      ]
+    },
+    {
+      "surface": "data",
+      "hp": 59,
+      "position": [
+        226,
+        41
+      ],
+      "messages": [
+        "O city, D dungeon, # ruin, * shrine, = road. E talks, J journal.",
+        "Known rumor: Word of the Lyssa for Millhavenmar",
+        "Known rumor: Bounty: Halfallfall",
+        "Known rumor: Carry Terms to Dungar",
+        "55 unheard rumors linger in towns. Talk (E) to hear them."
+      ]
+    },
+    {
+      "surface": "town",
+      "hp": 59,
+      "position": [
+        17,
+        17
+      ],
+      "messages": [
+        "Known rumor: Carry Terms to Dungar",
+        "55 unheard rumors linger in towns. Talk (E) to hear them.",
+        "You pass the gates of Millhavenmar. E greets folk; gates (G) lead out.",
+        "Cobbles and smoke. Gates (G) lead out; folk love gossip (E).",
+        "No shop door near. Look for S."
+      ]
+    },
+    {
+      "surface": "dungeon",
+      "hp": 59,
+      "position": [
+        32,
+        16
+      ],
+      "messages": [
+        "You pass the gates of Millhavenmar. E greets folk; gates (G) lead out.",
+        "Cobbles and smoke. Gates (G) lead out; folk love gossip (E).",
+        "No shop door near. Look for S.",
+        "You climb back to the overworld.",
+        "Descending into Redthor Wasteshelm Deep (dungeon, 3 floors). E on (>) climbs down, (<) climbs out."
+      ]
+    },
+    {
+      "surface": "combat",
+      "hp": 57,
+      "position": [
+        32,
+        16
+      ],
+      "messages": [
+        "You raise your guard against Audit raider.",
+        "Your guard turns the blow.",
+        "! Audit raider hits you for 1 (58 left).",
+        "You nick Audit raider for 9 (19 left).",
+        "! Audit raider hits you for 1 (57 left)."
+      ]
+    },
+    {
+      "surface": "after_combat",
+      "hp": 67,
+      "position": [
+        32,
+        16
+      ],
+      "messages": [
+        "! Audit raider hits you for 3 (54 left).",
+        "You hit Audit raider for 30 CRIT (0 left).",
+        "+ Audit raider falls! +13g +36xp.",
+        "Looted: Wastes Shortbow [weapon] bow 2-4 +2 ATK (21g) \u2014 equipped!",
+        "+ LEVEL 2! HP 67, ATK 13, +1 attribute point (see CHARACTERS)."
+      ]
+    },
+    {
+      "surface": "ascii",
+      "hp": 67,
+      "position": [
+        101,
+        108
+      ],
+      "messages": [
+        "+ Audit raider falls! +13g +36xp.",
+        "Looted: Wastes Shortbow [weapon] bow 2-4 +2 ATK (21g) \u2014 equipped!",
+        "+ LEVEL 2! HP 67, ATK 13, +1 attribute point (see CHARACTERS).",
+        "You climb back to the overworld.",
+        "Discovered Redthor Wasteshelm Deep (dungeon). Press E to enter."
+      ]
+    }
+  ]
+}

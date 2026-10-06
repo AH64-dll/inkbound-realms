@@ -1,0 +1,24 @@
+{
+  "steps": 100,
+  "moves": 91,
+  "hp": 49,
+  "clock": 956,
+  "messages": [
+    "! Dwarves Fang hits you for 2 (20 left).",
+    "You nick Dwarves Fang for 7 (0 left).",
+    "+ Dwarves Fang falls! +9g +39xp.",
+    "+ LEVEL 2! HP 58, ATK 10, +1 attribute point (see CHARACTERS).",
+    "Salvaged: Elira Fang [mat: fletch or fire it] (4g).",
+    "! The road offers: Black weather rolling in (see event)",
+    "You wait out the worst under an eave.",
+    "! A wild warband holds the ground (3 blades)!"
+  ],
+  "terrain_repeat": true,
+  "dungeon_repeat": true,
+  "frontier_width": 332,
+  "frontier_shift": [
+    32,
+    0
+  ],
+  "elapsed_seconds": 1.172
+}
