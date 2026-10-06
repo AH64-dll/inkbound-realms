@@ -266,6 +266,20 @@
           "maxLength": 2000,
           "title": "Prompt",
           "type": "string"
+        },
+        "animation_frames": {
+          "default": 1,
+          "maximum": 64,
+          "minimum": 1,
+          "title": "Animation Frames",
+          "type": "integer"
+        },
+        "animation_fps": {
+          "default": 8,
+          "maximum": 30,
+          "minimum": 1,
+          "title": "Animation Fps",
+          "type": "integer"
         }
       },
       "required": [
@@ -1739,6 +1753,65 @@
           },
           "title": "Services",
           "type": "array"
+        },
+        "stats": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "maximum": 1000000,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "title": "Stats",
+          "type": "object"
+        },
+        "resources": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "title": "Resources",
+          "type": "object"
+        },
+        "ability_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_.-]{0,79}$",
+            "type": "string"
+          },
+          "title": "Ability Ids",
+          "type": "array"
+        },
+        "behavior": {
+          "default": "melee",
+          "enum": [
+            "melee",
+            "ranged",
+            "support",
+            "passive"
+          ],
+          "title": "Behavior",
+          "type": "string"
+        },
+        "resistances": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "type": "integer"
+            }
+          },
+          "title": "Resistances",
+          "type": "object"
+        },
+        "vulnerabilities": {
+          "patternProperties": {
+            "^[a-z][a-z0-9_.-]{0,79}$": {
+              "type": "integer"
+            }
+          },
+          "title": "Vulnerabilities",
+          "type": "object"
         }
       },
       "required": [

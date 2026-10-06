@@ -283,6 +283,12 @@ class NPC(Entity):
     dialogue_id: Id
     relationships: dict[Id, Text] = Field(default_factory=dict)
     services: list[Literal["shop", "heal", "rumor", "history", "scout"]] = Field(default_factory=list)
+    stats: dict[Id, Number] = Field(default_factory=dict)
+    resources: dict[Id, Positive] = Field(default_factory=dict)
+    ability_ids: list[Id] = Field(default_factory=list)
+    behavior: Literal["melee", "ranged", "support", "passive"] = "melee"
+    resistances: dict[Id, int] = Field(default_factory=dict)
+    vulnerabilities: dict[Id, int] = Field(default_factory=dict)
 
 
 class EnemyArchetype(Entity):
@@ -356,6 +362,8 @@ class Asset(Entity):
     sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     fallback: Visual = Field(default_factory=Visual)
     prompt: str = Field(default="", max_length=2000)
+    animation_frames: int = Field(default=1, ge=1, le=64)
+    animation_fps: int = Field(default=8, ge=1, le=30)
 
 
 class Economy(Model):

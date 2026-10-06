@@ -108,7 +108,7 @@ def fixture_data(genre: str) -> dict:
 
     def entity(eid, name, description, *, glyph="?", concepts=None, **kwargs):
         return dict(id=eid, name=name, description=description,
-                    provenance=dict(concepts=concepts or d["themes"][:2], rationale=f"Supports {d['archetype'].lower()} play in {d['region']}.", source_chunk_ids=["chunk.0000"],
+                    provenance=dict(concepts=concepts or d["themes"][:2], rationale=f"In {d['region']}, {name} supports the {d['archetype'].lower()}'s practical obligations: {description}", source_chunk_ids=["chunk.0000"],
                                     transformations={"identity": "Original cast", "background": "Original institutional history", "motivation": "Collective repair", "relationships": "New local obligations", "geography": "Original topology", "naming": "Independently authored names"}),
                     visual=dict(glyph=glyph, color=d["color"]), **kwargs)
 

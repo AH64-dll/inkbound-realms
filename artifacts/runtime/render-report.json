@@ -1,0 +1,20 @@
+[
+  {
+    "genre": "fantasy",
+    "mean_draw_ms": 3.72,
+    "max_draw_ms": 6.242,
+    "turn_unchanged_by_30_frames": true
+  },
+  {
+    "genre": "horror",
+    "mean_draw_ms": 3.888,
+    "max_draw_ms": 6.881,
+    "turn_unchanged_by_30_frames": true
+  },
+  {
+    "genre": "science_fiction",
+    "mean_draw_ms": 3.484,
+    "max_draw_ms": 5.513,
+    "turn_unchanged_by_30_frames": true
+  }
+]

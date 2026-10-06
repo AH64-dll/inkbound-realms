@@ -32,6 +32,9 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
         if e.id in seen:
             fail("duplicate_id", e.id, "IDs must be globally unique")
         seen.add(e.id)
+    if any(i.code == "duplicate_id" for i in issues):
+        # A colliding typed object cannot be safely used by later cross-checks.
+        return issues
     groups = {field: {e.id for e in getattr(spec, field)} for field in (
         "stats", "resources", "damage_types", "equipment_slots", "abilities", "status_effects", "skills", "progression",
         "classes", "species", "factions", "regions", "locations", "npcs", "enemies", "quests", "items", "crafting", "dialogues", "assets")}
@@ -84,7 +87,7 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
                          (rules.influence_stat_id, "stats"), (rules.default_damage_type_id, "damage_types"),
                          (rules.default_ability_id, "abilities")]:
         ref(value, group, "world_rules")
-    health = index.get(rules.health_resource_id)
+    health = index.get(rules.health_resource_id) if rules.health_resource_id in groups["resources"] else None
     if health and health.role != "health":
         fail("invalid_health", "world_rules", "Health resource must carry the health role")
 
@@ -108,7 +111,7 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
         refs(actor.ability_ids, "abilities", actor.id)
         refs(actor.resistances.keys() | actor.vulnerabilities.keys(), "damage_types", actor.id)
         for key, value in actor.stats.items():
-            stat = index.get(key)
+            stat = index.get(key) if key in groups["stats"] else None
             if stat and not stat.minimum <= value <= stat.maximum:
                 fail("invalid_stat", actor.id, f"{key} outside allowed range")
         for key, value in actor.resistances.items():
@@ -117,6 +120,10 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
         for key, value in actor.vulnerabilities.items():
             if not 0 <= value <= 200:
                 fail("invalid_vulnerability", actor.id, f"{key}: use 0..200 percent")
+        for aid in actor.ability_ids:
+            ability = index.get(aid)
+            if aid in groups["abilities"] and any(rid not in actor.resources or cost > actor.resources[rid] for rid, cost in ability.cost.items()):
+                fail("unsupported_ability", actor.id, f"Cannot pay the cost of {aid}")
 
     for stat in spec.stats:
         if stat.minimum > stat.maximum:
@@ -142,7 +149,7 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
         if item.kind == "consumable" and not item.effects:
             fail("ineffective_item", item.id, "Consumable has no effects")
     for key in p.starting_items:
-        item = index.get(key)
+        item = index.get(key) if key in groups["items"] else None
         if item and item.slot_id and item.slot_id not in p.equipment_slots:
             fail("invalid_equipment", key, "Starting equipment has no compatible player slot")
     for prog in spec.progression:
@@ -165,7 +172,12 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
     for region in spec.regions:
         refs(region.faction_ids, "factions", region.id)
         refs(region.neighbor_ids, "regions", region.id)
+    positions = set()
     for loc in spec.locations:
+        position = (loc.region_id, loc.x, loc.y)
+        if position in positions:
+            fail("overlapping_locations", loc.id, "Two locations occupy the same region tile")
+        positions.add(position)
         ref(loc.region_id, "regions", loc.id); ref(loc.faction_id, "factions", loc.id, True)
         refs(loc.market_items, "items", loc.id)
         for c in loc.locked_by:
@@ -175,6 +187,11 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
     for npc in spec.npcs:
         ref(npc.location_id, "locations", npc.id); ref(npc.faction_id, "factions", npc.id, True)
         ref(npc.dialogue_id, "dialogues", npc.id); refs(npc.relationships, "npcs", npc.id)
+        refs(npc.stats, "stats", npc.id); refs(npc.resources, "resources", npc.id)
+        refs(npc.ability_ids, "abilities", npc.id)
+        refs(npc.resistances.keys() | npc.vulnerabilities.keys(), "damage_types", npc.id)
+        if npc.resources and rules.health_resource_id not in npc.resources:
+            fail("invalid_npc", npc.id, "Companion resources require health")
     for enemy in spec.enemies:
         ref(enemy.faction_id, "factions", enemy.id, True); refs(enemy.loot, "items", enemy.id)
         refs(enemy.phase_ability_ids, "abilities", enemy.id)
@@ -249,12 +266,27 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
     available_items = set(p.starting_items)
     available_items.update(k for loc in spec.locations for k in loc.market_items)
     available_items.update(k for enemy in spec.enemies for k in enemy.loot)
-    available_items.update(a.target for q in spec.quests for a in q.reward_actions if a.kind == "grant_item")
+    source_actions = [a for q in spec.quests for a in q.reward_actions]
+    source_actions.extend(a for loc in spec.locations for a in loc.entry_actions)
+    source_actions.extend(a for event in spec.world_events for a in event.actions)
+    source_actions.extend(a for dialogue in spec.dialogues for node in dialogue.nodes for choice in node.choices for a in choice.actions)
+    available_items.update(a.target for a in source_actions if a.kind == "grant_item")
     for _ in spec.crafting:
         for recipe in spec.crafting:
             if set(recipe.ingredients) <= available_items:
                 available_items.update(recipe.outputs)
     spawn_counts = {eid: sum(t.enemy_counts.get(eid, 0) for t in spec.encounters) for eid in groups["enemies"]}
+    for a in source_actions:
+        if a.kind == "spawn" and a.target in spawn_counts:
+            spawn_counts[a.target] += a.amount
+    # Generous global currency ceiling: reject demands exceeding even every
+    # finite reward and sale. This is a necessary bound, not an economy solver.
+    currency_ceiling = spec.economy.starting_gold + sum(a.amount for a in source_actions if a.kind == "gold")
+    currency_ceiling += sum(index[eid].gold * count for eid, count in spawn_counts.items())
+    currency_ceiling += sum(index[iid].price * n for iid, n in p.starting_items.items() if iid in groups["items"])
+    currency_ceiling += sum(index[iid].price * n * spawn_counts[enemy.id] for enemy in spec.enemies for iid, n in enemy.loot.items() if iid in groups["items"])
+    currency_ceiling += sum(index[a.target].price * a.amount for a in source_actions if a.kind == "grant_item" and a.target in groups["items"])
+    renewable_currency = any(t.respawn_turns for t in spec.encounters) or any(not e.once and any(a.kind in ("gold", "grant_item", "spawn") for a in e.actions) for e in spec.world_events)
     for quest in spec.quests:
         ref(quest.giver_id, "npcs", quest.id); refs(quest.prerequisites, "quests", quest.id)
         for obj in quest.objectives:
@@ -262,11 +294,15 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
                      "pay": "locations", "escort": "npcs", "choice": "dialogues"}[obj.kind]
             ref(obj.target_id, group, quest.id)
             ref(obj.destination_id, "locations", quest.id, obj.kind != "escort")
+            if obj.kind in ("visit", "talk", "escort", "choice") and obj.count != 1:
+                fail("impossible_objective", quest.id, "This objective is a unique deed and its count must be one")
             if obj.kind == "collect" and obj.target_id not in available_items:
                 fail("impossible_objective", quest.id, "Required item has no source")
             if obj.kind == "kill" and spawn_counts.get(obj.target_id, 0) < obj.count:
-                if not any(t.respawn_turns and obj.target_id in t.enemy_counts for t in spec.encounters):
+                if not any(t.respawn_turns and obj.target_id in t.enemy_counts for t in spec.encounters) and not any(not e.once and any(a.kind == "spawn" and a.target == obj.target_id for a in e.actions) for e in spec.world_events):
                     fail("impossible_objective", quest.id, "Not enough target enemies can spawn")
+        if not renewable_currency and sum(o.count for o in quest.objectives if o.kind == "pay") > currency_ceiling:
+            fail("impossible_economy", quest.id, "Required payment exceeds all finite currency and sale sources")
         for a in quest.reward_actions:
             action(a, quest.id)
 
@@ -274,7 +310,7 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
     # the quest that requires them. Source declarations alone are insufficient.
     accessible = {loc.id for loc in spec.locations if not loc.locked_by}
     completable: set[str] = set()
-    start = index.get(p.starting_location_id)
+    start = index.get(p.starting_location_id) if p.starting_location_id in groups["locations"] else None
     if start and start.locked_by:
         fail("inaccessible_area", p.starting_location_id, "Starting location is locked")
     reachable_regions = {start.region_id} if start else set()
@@ -296,8 +332,13 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
         if c.negate:
             # A negative initial condition can be met before the corresponding deed.
             return c.kind in ("flag", "quest_done", "quest_active", "visited", "kills", "item")
-        if c.kind in ("quest_done", "quest_active"):
+        if c.kind == "quest_done":
             return c.target in completable
+        if c.kind == "quest_active":
+            quest = index.get(c.target)
+            if c.target not in groups["quests"]: return False
+            giver = index.get(quest.giver_id) if quest.giver_id in groups["npcs"] else None
+            return set(quest.prerequisites) <= completable and (quest.discovered or giver and giver.location_id in accessible)
         if c.kind == "flag":
             return c.target in possible_flags
         if c.kind == "standing":
@@ -331,7 +372,7 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
                 possible_items.update(recipe.outputs)
                 possible_recipes.add(recipe.id)
         for q in spec.quests:
-            giver = index.get(q.giver_id)
+            giver = index.get(q.giver_id) if q.giver_id in groups["npcs"] else None
             if not giver or giver.location_id not in accessible or not set(q.prerequisites) <= completable:
                 continue
             possible = True
@@ -377,7 +418,7 @@ def validate_realm(spec: RealmSpec, *, check_maps: bool = True) -> list[Issue]:
                 possible_kills.add(a.target); possible_items.update(index[a.target].loot)
         potential_xp += sum(index[eid].xp * count for table in spec.encounters if enabled_table(table)
                             for eid, count in table.enemy_counts.items() if eid in groups["enemies"])
-        prog = index.get(p.progression_id)
+        prog = index.get(p.progression_id) if p.progression_id in groups["progression"] else None
         if prog:
             spent = 0; possible_level = 1
             while possible_level < 100 and spent + possible_level * prog.xp_per_level <= potential_xp:

@@ -141,3 +141,13 @@ def test_fixture_players_are_distinct():
 
 def test_schema_file_matches_models():
     assert json.loads(Path("schemas/realm_spec_v1.schema.json").read_text()) == RealmSpec.model_json_schema()
+
+
+def test_location_overlap_and_unfundable_payment_rejected(fantasy_data):
+    fantasy_data["locations"][1]["x"] = fantasy_data["locations"][0]["x"]
+    fantasy_data["locations"][1]["y"] = fantasy_data["locations"][0]["y"]
+    fantasy_data["quests"][0]["objectives"] = [{"kind": "pay", "target_id": "location.home", "count": 1000000}]
+    for encounter in fantasy_data["encounters"]:
+        encounter["respawn_turns"] = 0
+    codes = {i.code for i in validate_realm(RealmSpec.model_validate(fantasy_data))}
+    assert {"overlapping_locations", "impossible_economy"} <= codes

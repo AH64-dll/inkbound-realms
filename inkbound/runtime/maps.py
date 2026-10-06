@@ -24,6 +24,8 @@ class MapData(Model):
     points: dict[str, list[int]] = Field(default_factory=dict)
     floor: int = 0
     origin: list[int] = Field(default_factory=lambda: [0, 0])
+    terrain_seed: int = 0
+    thresholds: list[float] = Field(default_factory=list)
 
     def walkable(self, x: int, y: int) -> bool:
         return 0 <= y < len(self.grid) and 0 <= x < len(self.grid[0]) and self.grid[y][x] not in "#^~HIS"
@@ -59,6 +61,7 @@ def build_maps(spec: RealmSpec) -> dict[str, MapData]:
     for region in spec.regions:
         seed = stable_seed(spec.metadata.seed, region.id)
         rng = random.Random(seed)
+        thresholds = []
         if region.generator == "station":
             grid = [["#" if x in (0, region.width - 1) or y in (0, region.height - 1) else "."
                      for x in range(region.width)] for y in range(region.height)]
@@ -67,7 +70,7 @@ def build_maps(spec: RealmSpec) -> dict[str, MapData]:
                     if y % 7 != 0:
                         grid[y][x] = "#"
         else:
-            grid, _, _ = _gen_terrain(rng, region.width, region.height, seed % 1000000)
+            grid, _, thresholds = _gen_terrain(rng, region.width, region.height, seed % 1000000)
             if region.generator == "nautical":
                 # Navigable water is a distinct tile; islands become obstacles.
                 grid = [["," if c == "~" else "." if c in ",rs=" else "T" for c in row] for row in grid]
@@ -85,7 +88,8 @@ def build_maps(spec: RealmSpec) -> dict[str, MapData]:
         for loc in locations:
             grid[loc.y][loc.x] = {"settlement": "O", "dungeon": "D", "ruin": "R", "shrine": "*",
                                   "camp": "X", "farm": "v", "tower": "!"}[loc.kind]
-        maps[region.id] = MapData(id=region.id, grid=["".join(row) for row in grid], entrance=list(anchors[0]), points=points)
+        maps[region.id] = MapData(id=region.id, grid=["".join(row) for row in grid], entrance=list(anchors[0]), points=points,
+                                 terrain_seed=seed % 1000000, thresholds=thresholds)
         for loc in locations:
             if loc.kind == "settlement":
                 data = gen_town(stable_seed(seed, loc.id), "hamlet")

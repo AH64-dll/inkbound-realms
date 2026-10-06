@@ -7,6 +7,7 @@ build/
 dist/
 .cache/
 .env
+.tools/
 realms/
 saves/
 legacy/ascii_rpg/saves/
