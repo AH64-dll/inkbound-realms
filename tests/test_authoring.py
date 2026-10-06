@@ -179,6 +179,27 @@ def test_source_identity_in_settlement_is_rejected_before_downstream_content(spe
     assert "create_spell_system" not in provider.counters
 
 
+def test_large_prompt_view_preserves_whole_book_canon_and_mechanical_contract(spec):
+    data = spec.model_dump(mode="json")
+    data["player"]["stats"].update({"visual": 17, "provenance": 23})
+    before = json.dumps(data, sort_keys=True)
+    view = Harness.context_view(data)
+    assert json.dumps(data, sort_keys=True) == before
+    assert view["creative_direction"] == data["creative_direction"]
+    assert view["metadata"]["source_chunk_ids"] == data["metadata"]["source_chunk_ids"]
+    assert view["world_rules"] == data["world_rules"]
+    assert view["player"]["ability_ids"] == data["player"]["ability_ids"]
+    assert view["player"]["stats"] == data["player"]["stats"]
+    assert view["player"]["resources"] == data["player"]["resources"]
+    for section in ("abilities", "quests", "enemies", "locations", "items"):
+        for original, projected in zip(data[section], view[section]):
+            assert original["id"] == projected["id"]
+            for key, value in original.items():
+                if key not in {"provenance", "visual"} and value is not None and value != [] and value != {}:
+                    assert key in projected
+    assert len(json.dumps(view)) < len(before)
+
+
 def test_copied_creative_foundation_is_rejected_before_gameplay_construction(spec):
     book = ingest(Path("fixtures/books") / (spec.metadata.id.split(".")[1] + ".txt"))
     class CopyingProvider(FixtureToolProvider):

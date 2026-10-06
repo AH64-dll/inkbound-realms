@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from dataclasses import asdict
 from typing import Callable, Literal
 
@@ -154,6 +155,23 @@ class Harness:
         if isinstance(result, m.Entity): return [result.id]
         return [e.id for value in result.__dict__.values() if isinstance(value, list) for e in value if isinstance(e, m.Entity)]
 
+    @staticmethod
+    def context_view(data):
+        """Keep canon and mechanics; omit repeated audit/render defaults in large prompts."""
+        if len(canonical(data)) < 24000:
+            return data
+        def project(value):
+            if isinstance(value, dict):
+                entity = isinstance(value.get("id"), str) and isinstance(value.get("provenance"), dict)
+                return {key: deepcopy(item) if key == "creative_direction" else project(item) for key, item in value.items()
+                        if not (entity and key in {"provenance", "visual"}) and item is not None and item != [] and item != {}}
+            if isinstance(value, list):
+                return [project(item) for item in value]
+            return value
+        view = project(data)
+        view["context_note"] = "Prior provenance and entity visual defaults are omitted from this prompt only. All canon, IDs, references and mechanics remain; author new provenance and visuals using the tool schema."
+        return view
+
     def interpret(self, book: Book) -> m.BookInterpretation:
         summaries = []
         def check_summary(result):
@@ -208,7 +226,7 @@ class Harness:
                 reused = sorted({identity for _, text in content for identity in names_in_text(source_names, text)})
                 if copied or reused:
                     raise ValueError("Authored content must use fresh prose and new source-independent identities. Reused source identities: " + ", ".join(reused) + "; copied passages: " + ", ".join(i.path for i in copied))
-            result = self.ask(name, instruction, {**context, "realm_so_far": data}, check=check_content)
+            result = self.ask(name, instruction, {**context, "realm_so_far": self.context_view(data)}, check=check_content)
             if section:
                 if isinstance(data.get(section), list): data[section].append(result.model_dump(mode="json"))
                 else: data[section] = result.model_dump(mode="json")

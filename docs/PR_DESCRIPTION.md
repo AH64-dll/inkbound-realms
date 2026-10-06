@@ -48,7 +48,7 @@ progression and save/resume. Tests also cover ingestion, schema/graph failures,
 recorded structured tool responses, local HTTP adapter mocks, regeneration,
 cross-process determinism, assets and UI rendering.
 
-The current Linux suite passes 222 tests. Overflow finds survive full packs and
+The current Linux suite passes 225 tests. Overflow finds survive full packs and
 save/resume; main-quest items are protected from sale/crafting/consumable use.
 Living escorts, typed passives, authored water movement, summon allegiance and
 canonical package ordering are exercised. Reading and creative-foundation

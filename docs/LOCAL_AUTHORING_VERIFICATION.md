@@ -52,6 +52,12 @@ threads after observing slow Q4-cache prompt processing.
 A later settlement reused a protected source name. Originality checks now also
 run on each content stage, before downstream construction; the model then
 produced a fresh settlement called The Resonance Quarter.
+Both dungeon stages subsequently passed early checks. The ability stage is
+still running. Large construction prompts now omit prior entity provenance
+and visual defaults while preserving the complete creative direction, source
+coverage, identities, references and mechanics; the compiled data remains full.
+On the science-fiction fixture this reduced local-tokenizer context from 11,287
+to approximately 4,700 tokens. Final critique still receives the complete realm.
 A resumed compile is still pending; these accepted intermediate tools
 are not a completed or playable realm. Typed source identities distinguish proper
 names from reusable concepts, with actual-source spelling checks.
@@ -67,6 +73,6 @@ inkbound compile fixtures/books/science_fiction.txt realms/live-relay \
 
 A completed experiment must validate the resulting package, inspect its creative
 quality, play its linked objectives/combat/progression and verify save/resume.
-Structured transport alone is insufficient evidence. The 222 passing automated
+Structured transport alone is insufficient evidence. The 225 passing automated
 tests, fixture campaigns, screenshots and wheel-install smoke test establish
 their own narrower scopes.
