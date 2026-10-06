@@ -67,16 +67,21 @@ def names_in_text(names, text):
     return [name for name in names if (name in text if cjk_letters(name) else re.search(r"(?<!\w)" + re.escape(name) + r"(?!\w)", text))]
 
 
+def entity_prose(entity):
+    content = [(entity.id, entity.name), (entity.id, entity.description), (entity.id, entity.provenance.rationale)]
+    for field in ("background", "appearance", "personality", "motivation", "culture", "ideology", "lore"):
+        value = getattr(entity, field, None)
+        if isinstance(value, str): content.append((entity.id, value))
+    return content
+
+
 def originality_issues(spec: RealmSpec, book: Book) -> list[Issue]:
     issues = []
     identities = [identity.name for identity in spec.creative_direction.interpretation.source_identities if identity.proper_name]
     names = protected_names(book, identities) if not spec.metadata.adaptation.allow_source_names else set()
     content: list[tuple[str, str]] = []
     for entity in spec.entities():
-        content.extend([(entity.id, entity.name), (entity.id, entity.description), (entity.id, entity.provenance.rationale)])
-        for field in ("background", "appearance", "personality", "motivation", "culture", "ideology", "lore"):
-            value = getattr(entity, field, None)
-            if isinstance(value, str): content.append((entity.id, value))
+        content.extend(entity_prose(entity))
         if isinstance(entity, (PlayerDefinition, NPC, Faction, Location, EnemyArchetype, Item)):
             name = entity.name.lower()
             for protected in names:

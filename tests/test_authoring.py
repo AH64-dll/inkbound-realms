@@ -160,6 +160,25 @@ def test_home_services_and_spatial_contract_are_checked_before_dungeon_authoring
     assert sum(name == "create_location" for name, _ in provider.requests) == 3
 
 
+def test_source_identity_in_settlement_is_rejected_before_downstream_content(spec, tmp_path):
+    book_path = tmp_path / "source.txt"
+    book_path.write_text("Old Harbor watches a road beside an abandoned institution.")
+    from inkbound.realm.models import SourceIdentity
+    spec.creative_direction.interpretation.source_identities = [SourceIdentity(name="Old Harbor", kind="place", proper_name=True, role="An inhabited coastal settlement")]
+    class CopyingSettlement(FixtureToolProvider):
+        def complete(self, system, prompt, tools):
+            if tools[0].name == "create_location":
+                self.requests.append((tools[0].name, prompt))
+                payload = self.spec.locations[0].model_dump(mode="json")
+                payload["name"] = "Old Harbor"
+                return Response([ToolCall("create_location", payload)])
+            return super().complete(system, prompt, tools)
+    provider = CopyingSettlement(spec)
+    with pytest.raises(ProviderError, match="Reused source identities: old harbor"):
+        Harness(provider).compile(ingest(book_path), realm_id="realm.rejected", seed=42)
+    assert "create_spell_system" not in provider.counters
+
+
 def test_copied_creative_foundation_is_rejected_before_gameplay_construction(spec):
     book = ingest(Path("fixtures/books") / (spec.metadata.id.split(".")[1] + ".txt"))
     class CopyingProvider(FixtureToolProvider):

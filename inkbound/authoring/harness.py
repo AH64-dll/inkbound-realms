@@ -8,7 +8,7 @@ from typing import Callable, Literal
 from pydantic import Field, ValidationError
 
 from inkbound.authoring.ingest import Book
-from inkbound.authoring.originality import originality_issues, copied_prose_issues, prose_fields, protected_names, transformation_count, names_in_text
+from inkbound.authoring.originality import originality_issues, copied_prose_issues, prose_fields, protected_names, transformation_count, names_in_text, entity_prose
 from inkbound.authoring.providers import Provider, ProviderError, Tool
 from inkbound.realm import models as m
 from inkbound.realm.package import RealmPackage, canonical
@@ -181,6 +181,7 @@ class Harness:
     def compile(self, book: Book, *, realm_id: str, seed: int, adaptation: m.AdaptationPolicy | None = None) -> RealmPackage:
         adaptation = adaptation or m.AdaptationPolicy()
         interpretation = self.interpret(book)
+        source_names = protected_names(book, [identity.name for identity in interpretation.source_identities if identity.proper_name]) if not adaptation.allow_source_names else set()
         data: dict = {"realm_spec_version": 1, "metadata": {"id": realm_id, "title": book.title, "seed": seed, "source_digest": book.digest,
                     "source_chunk_ids": [c.id for c in book.chunks],
                     "source_title": book.title, "authoring_provider": self.provider.identity, "adaptation": adaptation.model_dump(mode="json")}}
@@ -196,7 +197,18 @@ class Harness:
                 instruction += " For original inspiration, each actor, faction, location and item needs at least four distinct substantive changes in provenance.transformations: identity, history, motives, relationships, role, appearance or geography. Naming alone does not count."
             if name == "create_location":
                 instruction += " Market_items maps stable item IDs to positive integer stock quantities, never display names or prices. IDs use only lowercase letters, digits, underscores, dots or hyphens. Plan those exact item IDs for the later item-family tool; use an empty market if none are needed."
-            result = self.ask(name, instruction, {**context, "realm_so_far": data}, check=check)
+            def check_content(result):
+                if check is not None: check(result)
+                entities = [result] if isinstance(result, m.Entity) else [e for value in result.__dict__.values() if isinstance(value, list) for e in value if isinstance(e, m.Entity)]
+                content = [field for entity in entities for field in entity_prose(entity)]
+                if isinstance(result, m.Dialogue):
+                    content.extend((result.id, node.text) for node in result.nodes)
+                    content.extend((result.id, choice.text) for node in result.nodes for choice in node.choices)
+                copied = copied_prose_issues(content, book)
+                reused = sorted({identity for _, text in content for identity in names_in_text(source_names, text)})
+                if copied or reused:
+                    raise ValueError("Authored content must use fresh prose and new source-independent identities. Reused source identities: " + ", ".join(reused) + "; copied passages: " + ", ".join(i.path for i in copied))
+            result = self.ask(name, instruction, {**context, "realm_so_far": data}, check=check_content)
             if section:
                 if isinstance(data.get(section), list): data[section].append(result.model_dump(mode="json"))
                 else: data[section] = result.model_dump(mode="json")

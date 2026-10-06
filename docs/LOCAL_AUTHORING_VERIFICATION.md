@@ -49,6 +49,9 @@ details. A subsequent structurally valid response classified the home as a camp,
 home-specific validation now requires an actual settlement inside its region.
 The server was then restarted with a 16K context, Q8 caches and eight batch
 threads after observing slow Q4-cache prompt processing.
+A later settlement reused a protected source name. Originality checks now also
+run on each content stage, before downstream construction; the model then
+produced a fresh settlement called The Resonance Quarter.
 A resumed compile is still pending; these accepted intermediate tools
 are not a completed or playable realm. Typed source identities distinguish proper
 names from reusable concepts, with actual-source spelling checks.
@@ -64,6 +67,6 @@ inkbound compile fixtures/books/science_fiction.txt realms/live-relay \
 
 A completed experiment must validate the resulting package, inspect its creative
 quality, play its linked objectives/combat/progression and verify save/resume.
-Structured transport alone is insufficient evidence. The 219 passing automated
+Structured transport alone is insufficient evidence. The 222 passing automated
 tests, fixture campaigns, screenshots and wheel-install smoke test establish
 their own narrower scopes.
