@@ -15,6 +15,30 @@ from inkbound.runtime.engine import Engine
 from inkbound.runtime.ui import App, TABS
 
 
+def test_neighboring_region_is_reachable_from_the_travel_menu(spec, tmp_path):
+    data = spec.model_copy(deep=True)
+    region = data.regions[0].model_copy(deep=True)
+    region.id = "region.neighbor"
+    region.name = "The farther district"
+    region.neighbor_ids = [data.regions[0].id]
+    data.regions[0].neighbor_ids = [region.id]
+    data.regions.append(region)
+    e = Engine(RealmPackage(data))
+    e.state.actors.clear()
+    app = App(e, tmp_path / "region.json")
+    app.open_overlay("caravan")
+    rows = app.overlay_rows()
+    app.selection = next(i for i, (eid, _) in enumerate(rows) if eid == region.id)
+    app.key(pg.K_RETURN)
+    assert e.player.map_id == region.id and app.overlay is None
+    e.save(tmp_path / "region.json")
+    restored = Engine.load(e.package, tmp_path / "region.json")
+    assert restored.travel_region(data.regions[0].id)
+    restored.player.resources[restored.health_id] = 0
+    assert not restored.travel_region(region.id)
+    pg.quit()
+
+
 def test_settings_persist_and_malformed_settings_fall_back(spec, tmp_path):
     app = App(Engine(RealmPackage(spec)), tmp_path / "save.json")
     app.tab = "SETTINGS"

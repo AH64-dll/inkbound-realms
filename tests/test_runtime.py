@@ -135,6 +135,25 @@ def test_fixture_passives_restore_configured_resource_and_clamp_to_capacity(spec
     assert e.player.resources["resource.energy"] == e.player.caps["resource.energy"]
 
 
+def test_outdoor_quest_giver_remains_accessible_after_frontier_and_save(spec, tmp_path):
+    data = spec.model_copy(deep=True)
+    data.npcs[0].location_id = "location.refuge"
+    e = Engine(RealmPackage(data))
+    e.state.actors.clear()
+    npc = data.npcs[0]
+    old = list(e.state.npc_positions[npc.id])
+    assert e.expand("left")
+    assert e.state.npc_positions[npc.id] == [old[0] + 16, old[1]]
+    e.player.x, e.player.y = e.state.npc_positions[npc.id]
+    assert e.interact() and e.state.active_npc_id == npc.id
+    assert npc.id in e.state.talked
+    e.close_dialogue()
+    path = tmp_path / "outdoor-guide.json"
+    e.save(path)
+    restored = Engine.load(e.package, path)
+    assert restored.interact() and restored.state.active_npc_id == npc.id
+
+
 def test_one_turn_restraint_blocks_reply_and_player_move(spec):
     data = spec.model_dump(mode="json")
     data["status_effects"][0]["skip_turn"] = True

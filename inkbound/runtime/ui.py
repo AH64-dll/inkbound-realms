@@ -138,7 +138,7 @@ class App:
                     _tile_icon(pg, self.screen, {"R": "#", "C": "C"}.get(glyph, glyph), X, Y, self.tile, x, y)
         for npc in e.spec.npcs:
             xy = e.state.npc_positions.get(npc.id)
-            if xy and npc.location_id == p.map_id:
+            if xy and e.npc_map_id(npc) == p.map_id and e.npc_available(npc):
                 self.draw_actor(npc, *xy, x0, y0, npc.visual.color)
         for actor in e.state.actors.values():
             if actor.map_id != p.map_id or not e.alive(actor): continue
@@ -308,7 +308,10 @@ class App:
         if self.overlay == "oath":
             return [(f.id, f.name + " — " + f.ideology) for f in e.spec.factions]
         if self.overlay == "caravan":
-            return [(loc.id, f"{loc.name} — {e.spec.economy.caravan_price} {e.spec.economy.currency_name}") for loc in e.spec.locations if loc.kind == "settlement" and loc.id in e.state.visited]
+            rows = [(loc.id, f"{loc.name} — {e.spec.economy.caravan_price} {e.spec.economy.currency_name}") for loc in e.spec.locations if loc.kind == "settlement" and loc.id in e.state.visited]
+            if e.player.map_id in {region.id for region in e.spec.regions}:
+                rows.extend((rid, "Route to " + e.index[rid].name) for rid in e.index[e.player.map_id].neighbor_ids)
+            return rows
         return []
 
     def draw_overlay(self, w, h):
@@ -394,7 +397,7 @@ class App:
                 if self.selection < len(rows):
                     eid = rows[self.selection][0]
                     action = {"abilities": e.use_ability, "craft": e.craft, "shop": e.buy if self.shop_mode == "buy" else e.sell,
-                              "oath": e.swear, "caravan": e.caravan, "journal": lambda qid: setattr(self, "tracked", qid)}[self.overlay]
+                              "oath": e.swear, "caravan": lambda eid: e.travel_region(eid) if eid in {r.id for r in e.spec.regions} else e.caravan(eid), "journal": lambda qid: setattr(self, "tracked", qid)}[self.overlay]
                     action(eid); play("ui")
                     if self.overlay in ("abilities", "caravan"): self.overlay = None
             return

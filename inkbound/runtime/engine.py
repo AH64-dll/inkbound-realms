@@ -40,10 +40,11 @@ class Engine:
             if item.slot_id and item.slot_id not in self.state.equipment:
                 self.equip(key)
         for npc in self.spec.npcs:
-            m = maps.get(npc.location_id)
+            m = maps.get(self.npc_map_id(npc))
             if m:
-                candidates = sorted(m.reachable(), key=lambda xy: (abs(xy[0] - len(m.grid[0]) // 2) + abs(xy[1] - len(m.grid) // 2), xy))
-                occupied = {tuple(v) for k, v in self.state.npc_positions.items() if self.index[k].location_id == npc.location_id}
+                center = m.points.get(npc.location_id, [len(m.grid[0]) // 2, len(m.grid) // 2])
+                candidates = sorted(m.reachable(), key=lambda xy: (abs(xy[0] - center[0]) + abs(xy[1] - center[1]), xy))
+                occupied = {tuple(v) for k, v in self.state.npc_positions.items() if self.npc_map_id(self.index[k]) == m.id}
                 xy = next(p for p in candidates if p not in occupied and p != tuple(m.entrance))
                 self.state.npc_positions[npc.id] = list(xy)
         self.log(f"{self.spec.metadata.title}: {definition.name}, {definition.archetype}.")
@@ -61,6 +62,13 @@ class Engine:
     @property
     def current_map(self):
         return self.state.maps[self.player.map_id]
+
+    def npc_map_id(self, npc):
+        return npc.location_id if npc.location_id in self.state.maps else self.index[npc.location_id].region_id
+
+    def npc_available(self, npc):
+        loc = self.index[npc.location_id]
+        return loc.id in self.state.unlocked or self.conditions(loc.locked_by)
 
     def log(self, message: str):
         self.state.messages.append(message)
@@ -400,6 +408,10 @@ class Engine:
                 actor.x += sx; actor.y += sy
         for drop in self.state.pending_loot.values():
             if drop.map_id == m.id: drop.x += sx; drop.y += sy
+        for npc in self.spec.npcs:
+            if self.npc_map_id(npc) == m.id and npc.id in self.state.npc_positions:
+                xy = self.state.npc_positions[npc.id]
+                xy[0] += sx; xy[1] += sy
         m.entrance = [m.entrance[0] + sx, m.entrance[1] + sy]
         m.points = {eid: [xy[0] + sx, xy[1] + sy] for eid, xy in m.points.items()}
         m.origin = [x0 - sx, y0 - sy]
@@ -490,6 +502,10 @@ class Engine:
             return True
         if self.state.active_dialogue_id:
             return False
+        for npc in self.spec.npcs:
+            xy = self.state.npc_positions.get(npc.id)
+            if self.npc_map_id(npc) == self.player.map_id and self.npc_available(npc) and xy and abs(xy[0] - self.player.x) + abs(xy[1] - self.player.y) <= 1:
+                return self.talk(npc.id)
         if self.player.map_id in {r.id for r in self.spec.regions}:
             if self.location_here() is None and self.current_map.grid[self.player.y][self.player.x] == "*":
                 key = f"refuge.{self.player.map_id}.{self.player.x + self.current_map.origin[0]}.{self.player.y + self.current_map.origin[1]}.{self.day}"
@@ -499,10 +515,6 @@ class Engine:
                     self.log("The frontier refuge offers a quiet meal and shelter.")
                 return True
             return self.enter()
-        for npc in self.spec.npcs:
-            xy = self.state.npc_positions.get(npc.id)
-            if npc.location_id == self.player.map_id and xy and abs(xy[0] - self.player.x) + abs(xy[1] - self.player.y) <= 1:
-                return self.talk(npc.id)
         glyph = self.current_map.grid[self.player.y][self.player.x]
         if glyph == "<":
             return self.change_floor(-1)
@@ -524,7 +536,7 @@ class Engine:
     def talk(self, npc_id):
         npc = self.index.get(npc_id)
         xy = self.state.npc_positions.get(npc_id)
-        if not npc or not xy or npc.location_id != self.player.map_id or abs(xy[0] - self.player.x) + abs(xy[1] - self.player.y) > 1:
+        if not npc or not xy or not self.alive(self.player) or self.npc_map_id(npc) != self.player.map_id or not self.npc_available(npc) or abs(xy[0] - self.player.x) + abs(xy[1] - self.player.y) > 1:
             return False
         if npc_id not in self.state.talked:
             self.state.talked.append(npc_id)
@@ -702,7 +714,7 @@ class Engine:
 
     def travel_region(self, region_id):
         base = self.player.map_id
-        if base not in {r.id for r in self.spec.regions} or region_id not in self.index[base].neighbor_ids:
+        if not self.alive(self.player) or base not in {r.id for r in self.spec.regions} or region_id not in self.index[base].neighbor_ids:
             return False
         self.player.map_id = region_id; self.player.x, self.player.y = self.current_map.entrance
         self._spawn_encounters(); self.tick(); return True
@@ -1114,6 +1126,9 @@ class Engine:
                 raise ValueError("Invalid saved pending loot")
         if not set(s.companions) <= {n.id for n in self.spec.npcs} or not set(s.companions.values()) <= {loc.id for loc in self.spec.locations}:
             raise ValueError("Invalid saved companion references")
+        for npc_id, xy in s.npc_positions.items():
+            if npc_id not in {n.id for n in self.spec.npcs} or len(xy) != 2 or not s.maps[self.npc_map_id(self.index[npc_id])].walkable(*xy):
+                raise ValueError("Invalid saved NPC position")
         if any(slot not in self.spec.player.equipment_slots or eid not in self.index or self.index[eid].slot_id != slot for slot, eid in s.equipment.items()):
             raise ValueError("Invalid saved equipment")
         quests = {q.id for q in self.spec.quests}
