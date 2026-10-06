@@ -15,8 +15,8 @@ Tools and weights are ignored under `.tools/`; they are not runtime dependencies
 or part of the distributed package. The test input is the project's own short
 science-fiction story, `fixtures/books/science_fiction.txt`.
 
-The initial unconstrained 32K-context server exhausted memory. Subsequent runs
-use a temporary user scope with `MemoryMax=4G`, `MemorySwapMax=0`, 16K context,
+The initial unconstrained 32K-context server exhausted memory. Subsequent runs with that model
+used a temporary user scope with `MemoryMax=4G`, `MemorySwapMax=0`, 16K context,
 quantized Q4 key/value caches, two CPU threads, no warmup/repacking, native Jinja
 tool support and reasoning disabled. The inference process is preferentially
 eligible for OOM termination; it does not change other services' limits.
@@ -33,17 +33,33 @@ though its observed memory peak was about 3.1 GiB. No incomplete candidate was
 published as a RealmPackage. Completed responses remain cached; caches do not
 turn rejected output into accepted content.
 
+The subsequent Qwen3-4B-Instruct-2507 experiment uses a separate verified
+GGUF from lmstudio-community, 2,497,280,448 bytes, with SHA-256:
+
+```text
+8cdb57cbb880d313736a9bc4e3d3d2485f145b5e19cf33783746e753e82641fc
+```
+
+Its temporary scope allows 5 GiB, with 32K context, quantized Q4 caches and four
+CPU threads. It produced accepted fresh reading analysis, an original world
+foundation, gameplay rules, a region and a faction. Its first settlement attempts
+used a display name as a market identifier and were rejected. The harness now
+explicitly distinguishes market IDs from display names and retains final error
+details. A resumed compile is still pending; these accepted intermediate tools
+are not a completed or playable realm. Typed source identities distinguish proper
+names from reusable concepts, with actual-source spelling checks.
+
 To run against a stable tool-capable compatible server:
 
 ```bash
 inkbound compile fixtures/books/science_fiction.txt realms/live-relay \
   --id realm.live-relay --dialect compatible \
-  --endpoint http://127.0.0.1:18080/v1 --model qwen3-4b \
+  --endpoint http://127.0.0.1:18080/v1 --model qwen3-4b-instruct-2507 \
   --max-calls 120 --timeout 1800
 ```
 
 A completed experiment must validate the resulting package, inspect its creative
 quality, play its linked objectives/combat/progression and verify save/resume.
-Structured transport alone is insufficient evidence. The 176 passing automated
+Structured transport alone is insufficient evidence. The 213 passing automated
 tests, fixture campaigns, screenshots and wheel-install smoke test establish
 their own narrower scopes.

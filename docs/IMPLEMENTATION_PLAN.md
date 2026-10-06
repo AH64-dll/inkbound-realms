@@ -43,10 +43,12 @@ original request. Offline fixtures do not prove live semantic authorship;
 render smoke tests do not prove a whole campaign is enjoyable. Persist genuine
 limitations and verify the largest possible authorized scope before handoff.
 
-Current evidence: 176 tests passed, including HTTP streaming, server-disconnect
+Current evidence: 213 tests passed, including HTTP streaming, server-disconnect
 and retry checks. The local model returned structured source analysis and a
 world identity, but both contained copied passages and cannot be accepted.
 Fresh-prose guards now run during reading and creative-foundation construction.
+A newer instruction model accepted fresh analysis, creative direction, rules,
+region and faction; its settlement validation is being retried.
 No validated live-authored realm has been produced yet; repeated global OOM
 events from another workload also interrupted the isolated local model server.
 Runtime launch/captures, full fixture campaigns and installation via uv succeeded.

@@ -260,8 +260,9 @@ def test_structured_output_retry_and_budget(spec):
         identity = "broken"
         def complete(self, system, prompt, tools): return Response([ToolCall("wrong_tool", {})])
     h = Harness(Broken())
-    with pytest.raises(ProviderError, match="three attempts"):
+    with pytest.raises(ProviderError, match="three attempts") as failure:
         h.ask("define_economy", "Define economy", {})
+    assert "Call exactly the offered tool once" in str(failure.value)
     assert h.calls == 3
     with pytest.raises(ProviderError, match="budget"):
         Harness(Broken(), max_calls=0).interpret(ingest("fixtures/books/fantasy.txt"))

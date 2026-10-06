@@ -147,7 +147,7 @@ class Harness:
                 return result
             except (ValueError, ValidationError) as exc:
                 error = "\nPREVIOUS OUTPUT WAS REJECTED. Correct these validation errors, preserve context:\n" + str(exc)[:6000]
-        raise ProviderError(f"{name} failed structured validation after three attempts")
+        raise ProviderError(f"{name} failed structured validation after three attempts:{error}")
 
     @staticmethod
     def _ids(result):
@@ -194,6 +194,8 @@ class Harness:
             instruction += " Keep entity descriptions, motivations and provenance concise and specific, generally one concrete sentence per field. Avoid boilerplate; keep lists focused."
             if name in {"create_faction", "create_location", "create_character", "create_enemy_archetype", "create_boss", "create_artifact", "define_player_archetype", "create_item_family"}:
                 instruction += " For original inspiration, each actor, faction, location and item needs at least four distinct substantive changes in provenance.transformations: identity, history, motives, relationships, role, appearance or geography. Naming alone does not count."
+            if name == "create_location":
+                instruction += " Market_items maps stable item IDs to positive integer prices, never display names. IDs use only lowercase letters, digits, underscores, dots or hyphens. Plan those exact item IDs for the later item-family tool; use an empty market if none are needed."
             result = self.ask(name, instruction, {**context, "realm_so_far": data}, check=check)
             if section:
                 if isinstance(data.get(section), list): data[section].append(result.model_dump(mode="json"))
